@@ -1,0 +1,21 @@
+{
+  "source": {
+    "include": ["index.js", "lib.js", "browserServerSetting.js", "core"],
+    "includePattern": ".+\\.js(doc|x)?$"
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "plugins": ["plugins/markdown"],
+  "opts": {
+    "recurse": true,
+    "destination": "./doc/jsdoc/html/",
+    "template": "node_modules/tui-jsdoc-template"
+  }
+}
+

@@ -1,0 +1,16 @@
+{
+  "name": "xdevkit",
+  "version": "0.7",
+  "main": "index.js",
+  "repository": "git@github.com:/autoaim-jp/xdevkit.git",
+  "author": "autoaim_jp <git@autoaim.jp>",
+  "license": "MIT",
+  "scripts": {
+    "gendoc": "yarn jsdoc -c doc/jsdoc/config.json"
+  },
+  "type": "module",
+  "dependencies": {
+    "jsdoc": "^3.6.11",
+    "tui-jsdoc-template": "^1.2.2"
+  }
+}
