@@ -1,4 +1,10 @@
-/* /xdevkit/browserServerSetting.js */
+/**
+ * /xdevkit/browserServerSetting.js
+ *
+ * @file 全てのサービスの、ブラウザとサーバーで共通の定数を定義するファイル。
+ * @namespace browserServerSetting
+ */
+
 export const apiEndpoint = '/f'
 export const labelList = {
   scope: {
@@ -40,6 +46,12 @@ const settingList = {
   statusList,
 }
 
+/**
+ * const { key1, key2 } = browserServerSetting.get('key1', 'key2') のようにして定数を取得できる。
+ *
+ * @memberof browserServerSetting
+ * @param {Array} keyList
+ */
 export const get = (...keyList) => {
   const constantList = keyList.reduce((prev, curr) => {
     prev[curr] = settingList[curr]

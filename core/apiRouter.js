@@ -1,6 +1,19 @@
-/* /xdevkit/core/apiRouter.js */
+/**
+ * /xdevkit/core/apiRouter.js
+ *
+ * @file OIDC関連のAPIエンドポイントのルーターのファイル。
+ */
 const mod = {}
 
+/**
+ * settingとモジュールを受け取り初期化する。
+ *
+ * @memberof core
+ * @param {Object} browserServerSetting
+ * @param {Object} setting
+ * @param {module} lib
+ * @param {module} express
+ */
 const init = (browserServerSetting, setting, lib, express) => {
   mod.bsc = browserServerSetting
   mod.setting = setting
@@ -8,6 +21,16 @@ const init = (browserServerSetting, setting, lib, express) => {
   mod.express = express
 }
 
+/**
+ * エラー時にレスポンスを返す。
+ *
+ * @memberof core
+ * @param {Integer} status
+ * @param {String} error
+ * @param {Boolean} isServerRedirect
+ * @param {Object} response
+ * @param {Object} session
+ */
 const _getErrorResponse = (status, error, isServerRedirect, response = null, session = {}) => {
   const redirect = `${mod.setting.url.ERROR_PAGE}?error=${encodeURIComponent(error)}`
   if (isServerRedirect) {
@@ -21,7 +44,15 @@ const _getErrorResponse = (status, error, isServerRedirect, response = null, ses
   }
 }
 
-/* POST /f/xlogin/connect */
+/**
+ * 認証サーバーへ、OIDCを開始するためのHTTPリクエストを送信する。
+ * /f/xlogin/connect へPOSTリクエストが来たときに、
+ * 必要なパラメータを整理し、セッションへ登録してから
+ * ブラウザからGETリクエストでリダイレクトさせる。
+ *
+ * @memberof core
+ * @param {String} redirectAfterAuth
+ */
 const _handleXloginConnect = (redirectAfterAuth) => {
   const oidcSessionPart = {}
   oidcSessionPart['iss'] = mod.setting.env.AUTH_SERVER_ORIGIN
@@ -46,7 +77,18 @@ const _handleXloginConnect = (redirectAfterAuth) => {
   return { status, session: newUserSession, response: null, redirect: redirectTo }
 }
 
-/* GET /f/xlogin/callback */
+/**
+ * 認証サーバーからのコールバックを処理し、accessTokenやuserInfoを問い合わせる。
+ * /f/xlogin/callback へGETリクエストが来たときに、
+ * codeとcodeVerifierでaccessTokenを、
+ * accessTokenでuserInfoを、POSTリクエストで問い合わせる。
+ *
+ * @memberof core
+ * @param {String} state
+ * @param {String} code
+ * @param {String} iss
+ * @param {Object} userSession
+ */
 const _handleXloginCode = async (state, code, iss, userSession) => {
   if (!userSession || !userSession.oidc) {
     const status = mod.bsc.statusList.INVALID_SESSION
@@ -103,7 +145,14 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
   return { status, session: { userInfo }, response: null, redirect: redirectTo }
 }
 
-/* GET /f/user/profile */
+/**
+ * マイページからのリクエストを処理する。
+ * /f/user/profile にGETリクエストが来たときに、
+ * セッションからユーザー情報を返す。
+ *
+ * @memberof core
+ * @param {Object} authSession
+ */
 const _handleUserProfile = (authSession) => {
   if (!authSession || !authSession.userInfo) {
     const status = mod.bsc.statusList.INVALID_SESSION
@@ -116,6 +165,14 @@ const _handleUserProfile = (authSession) => {
   return { status, session: authSession, response: { userInfo } }
 }
 
+/**
+ * HTTPリクエストの処理を終了する。
+ *
+ * @memberof core
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Object} handleResult
+ */
 const _endResponse = (req, res, handleResult) => {
   console.log('_endResponse error:', handleResult.error)
   req.session.auth = handleResult.session
@@ -129,6 +186,11 @@ const _endResponse = (req, res, handleResult) => {
   }
 }
 
+/**
+ * 処理するリクエストのパスとハンドラをセットしたルーターを作成する。
+ *
+ * @memberof core
+ */
 export const getApiRouter = () => {
   const expressRouter = mod.express.Router()
 

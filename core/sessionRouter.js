@@ -1,6 +1,20 @@
-/* /xdevkit/core/sessionRouter.js */
+/**
+ * /xdevkit/core/sessionRouter.js
+ *
+ * @file セッションを管理するルーターのファイル。
+ */
 const mod = {}
 
+/**
+ * settingとモジュールを受け取り初期化する。
+ *
+ * @memberof core
+ * @param {Object} setting
+ * @param {module} express
+ * @param {module} expressSession
+ * @param {module} Redis
+ * @param {module} RedisStore
+ */
 const init = (setting, express, expressSession, Redis, RedisStore) => {
   mod.setting = setting
   mod.express = express
@@ -9,6 +23,11 @@ const init = (setting, express, expressSession, Redis, RedisStore) => {
   mod.RedisStore = RedisStore
 }
 
+/**
+ * セッションを管理するルーターを作成する。
+ *
+ * @memberof core
+ */
 export const getSessionRouter = () => {
   const expressRouter = mod.express.Router()
   const redis = new mod.Redis({
