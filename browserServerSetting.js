@@ -40,10 +40,18 @@ export const statusList = {
   INVALID_OIDC_ISSUER: 1101,
 }
 
+export const userReadableDateFormat = {
+  full: 'YYYY/MM/DD hh:mm:ss',
+  day: 'YYYY/MM/DD',
+  hourMinute: 'hh:mm',
+  time: 'hh:mm:ss',
+}
+
 const settingList = {
   apiEndpoint,
   labelList,
   statusList,
+  userReadableDateFormat,
 }
 
 /**
