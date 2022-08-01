@@ -8,12 +8,21 @@
 export const apiEndpoint = '/f'
 export const labelList = {
   scope: {
-    read: {
-      'emailAddress': 'メールアドレスの取得',
-      'userName': 'ユーザー名の取得',
-      'serviceUserId': 'ユーザーIDの取得',
+    global: {
+      'notification': 'すべての通知',
     },
-    write: {
+    auth: {
+      'emailAddress': 'メールアドレス',
+      'userName': 'ユーザー名',
+    },
+    service: {
+      'serviceUserId': 'ユーザーID',
+      'notification': 'サービス内通知',
+    },
+    operation: {
+      read: '取得',
+      write: '保存',
+      append: '追記',
     },
     other: {
       isRequired: '必須',
