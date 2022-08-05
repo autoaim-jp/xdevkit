@@ -142,7 +142,7 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
   const status = mod.bsc.statusList.LOGIN_SUCCESS
   const redirectTo = mod.lib.addQueryStr(userSession.oidc['redirectAfterAuth'], mod.lib.objToQuery({ code: status }))
 
-  return { status, session: { userInfo }, response: null, redirect: redirectTo }
+  return { status, session: { accessToken, userInfo }, response: null, redirect: redirectTo }
 }
 
 /**
