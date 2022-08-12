@@ -47,6 +47,8 @@ export const statusList = {
 
   API_ERROR: 1100,
   INVALID_OIDC_ISSUER: 1101,
+
+  NOT_FOUND: 1200,
 }
 
 export const userReadableDateFormat = {
