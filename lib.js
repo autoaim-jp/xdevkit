@@ -19,6 +19,43 @@ const init = (crypto, axios) => {
 }
 
 /**
+ * axiosで指定したurlにHTTPリクエストを送信する。
+ *
+ * @memberof lib
+ * @param {Boolean} isPost
+ * @param {String} url
+ * @param {Object} param
+ * @param {Object} header
+ * @param {Boolean} json
+ */
+const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
+  return new Promise((resolve) => {
+    const query = param && Object.keys(param).map((key) => { return `${key}=${param[key]}` }).join('&')
+    const queryString = query ? `?${query}` : ''
+    const opt = {
+      method: isPost ? 'POST' : 'GET',
+      url: url + (isPost ? '' : queryString),
+      headers: { ...header },
+      timeout: 30 * 1000,
+    }
+    if (json) {
+      opt.responseType = 'json'
+    }
+    if (isPost && param) {
+      opt.data = json ? param : param.toString()
+    }
+    mod.axios(opt)
+      .then((res) => {
+        resolve({ res, data: res.data })
+      })
+      .catch((error) => {
+        resolve({ error })
+      })
+  })
+}
+
+
+/**
  * 指定した文字数のランダム文字列(base64urlエンコード)を生成する。
  *
  * @memberof lib
@@ -54,9 +91,8 @@ const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
 
   if (codeChallengeMethod === 'S256') {
     return calcSha256AsB64Url(codeVerifier)
-  } else {
-    throw new Error('unimplemented')
   }
+  throw new Error('unimplemented')
 }
 
 /**
@@ -68,12 +104,14 @@ const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
  * @param {String} endpoint
  */
 const getAccessTokenByCode = (code, oidcSessionPart, endpoint) => {
-  if (!code || !oidcSessionPart['clientId'] || !oidcSessionPart['state'] || !oidcSessionPart['codeVerifier']) {
+  if (!code || !oidcSessionPart.clientId || !oidcSessionPart.state || !oidcSessionPart.codeVerifier) {
     return null
   }
 
   const { clientId, state, codeVerifier } = oidcSessionPart
-  const oidcQueryStr = objToQuery({ clientId, state, code, codeVerifier })
+  const oidcQueryStr = objToQuery({
+    clientId, state, code, codeVerifier,
+  })
   const reqUrl = `${endpoint}?${oidcQueryStr}`
 
   return apiRequest(false, reqUrl, {}, {}, true)
@@ -93,8 +131,8 @@ const getUserInfo = (clientId, filterKeyList, accessToken, endpoint) => {
     return null
   }
 
-  const header = { 
-    'authorization': `Bearer ${accessToken}`,
+  const header = {
+    authorization: `Bearer ${accessToken}`,
     'x-xlogin-client-id': clientId,
   }
   const filterKeyListStr = filterKeyList.join(',')
@@ -114,56 +152,18 @@ const getUserInfo = (clientId, filterKeyList, accessToken, endpoint) => {
 const addQueryStr = (url, queryStr) => {
   if (url.indexOf('?') >= 0) {
     return `${url}&${queryStr}`
-  } else {
-    return `${url}?${queryStr}`
   }
+  return `${url}?${queryStr}`
 }
-
-/**
- * axiosで指定したurlにHTTPリクエストを送信する。
- *
- * @memberof lib
- * @param {Boolean} isPost
- * @param {String} url
- * @param {Object} param
- * @param {Object} header
- * @param {Boolean} json
- */
-const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
-  return new Promise((resolve, reject) => {
-    const query = param && Object.keys(param).map((key) => { return key + '=' + param[key] }).join('&')
-    const opt = {
-      method: isPost? 'POST': 'GET',
-      url: url + (isPost? '': (query? '?' + query: '')),
-      headers: Object.assign({
-      }, header),
-      timeout: 30 * 1000,
-    }
-    if(json) {
-      opt.responseType = 'json'
-    }
-    if(isPost && param) {
-      opt.data = json? (isPost? (param? param: {}): {}): param.toString()
-    }
-    mod.axios(opt)
-      .then((res) => {
-        resolve({ res, data: res.data })
-      })
-      .catch((error) => {
-        resolve({ error })
-      })
-  })
-}
-
 
 export default {
   init,
+  apiRequest,
   getRandomB64UrlSafe,
   objToQuery,
   convertToCodeChallenge,
   getAccessTokenByCode,
   getUserInfo,
   addQueryStr,
-  apiRequest,
 }
 
