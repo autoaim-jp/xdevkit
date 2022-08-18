@@ -34,13 +34,17 @@ const init = (browserServerSetting, setting, lib, express) => {
 const _getErrorResponse = (status, error, isServerRedirect, response = null, session = {}) => {
   const redirect = `${mod.setting.url.ERROR_PAGE}?error=${encodeURIComponent(error)}`
   if (isServerRedirect) {
-    return { status, session, response, redirect, error }
-  } else {
-    if (response) {
-      return { status, session, response, error }
-    } else {
-      return { status, session, response: { status, error, redirect }, error }
+    return {
+      status, session, response, redirect, error,
     }
+  }
+  if (response) {
+    return {
+      status, session, response, error,
+    }
+  }
+  return {
+    status, session, response: { status, error, redirect }, error,
   }
 }
 
@@ -55,18 +59,18 @@ const _getErrorResponse = (status, error, isServerRedirect, response = null, ses
  */
 const _handleXloginConnect = (redirectAfterAuth) => {
   const oidcSessionPart = {}
-  oidcSessionPart['iss'] = mod.setting.env.AUTH_SERVER_ORIGIN
-  oidcSessionPart['codeVerifier'] = mod.lib.getRandomB64UrlSafe(mod.setting.api.CODE_VERIFIER_L)
-  oidcSessionPart['redirectAfterAuth'] = redirectAfterAuth
+  oidcSessionPart.iss = mod.setting.env.AUTH_SERVER_ORIGIN
+  oidcSessionPart.codeVerifier = mod.lib.getRandomB64UrlSafe(mod.setting.api.CODE_VERIFIER_L)
+  oidcSessionPart.redirectAfterAuth = redirectAfterAuth
 
   const oidcQueryParam = {}
-  oidcQueryParam['codeChallengeMethod'] = mod.setting.api.XLOGIN_CODE_CHALLENGE_METHOD
-  oidcQueryParam['codeChallenge'] = mod.lib.convertToCodeChallenge(oidcSessionPart['codeVerifier'], oidcQueryParam['codeChallengeMethod'])
-  oidcQueryParam['state'] = mod.lib.getRandomB64UrlSafe(mod.setting.api.STATE_L)
-  oidcQueryParam['responseType'] = mod.setting.api.XLOGIN_RESPONSE_TYPE 
-  oidcQueryParam['scope'] = mod.setting.api.SCOPE
-  oidcQueryParam['clientId'] = mod.setting.env.CLIENT_ID
-  oidcQueryParam['redirectUri'] = mod.setting.env.SERVER_ORIGIN + mod.setting.url.XLOGIN_REDIRECT_URI
+  oidcQueryParam.codeChallengeMethod = mod.setting.api.XLOGIN_CODE_CHALLENGE_METHOD
+  oidcQueryParam.codeChallenge = mod.lib.convertToCodeChallenge(oidcSessionPart.codeVerifier, oidcQueryParam.codeChallengeMethod)
+  oidcQueryParam.state = mod.lib.getRandomB64UrlSafe(mod.setting.api.STATE_L)
+  oidcQueryParam.responseType = mod.setting.api.XLOGIN_RESPONSE_TYPE
+  oidcQueryParam.scope = mod.setting.api.SCOPE
+  oidcQueryParam.clientId = mod.setting.env.CLIENT_ID
+  oidcQueryParam.redirectUri = mod.setting.env.SERVER_ORIGIN + mod.setting.url.XLOGIN_REDIRECT_URI
 
   const oidcQueryStr = `?${mod.lib.objToQuery(oidcQueryParam)}`
   const redirectTo = mod.setting.env.AUTH_SERVER_ORIGIN + mod.setting.url.XLOGIN_AUTHORIZATION_ENDPOINT + oidcQueryStr
@@ -74,7 +78,9 @@ const _handleXloginConnect = (redirectAfterAuth) => {
   const newUserSession = { oidc: Object.assign(oidcSessionPart, oidcQueryParam) }
 
   const status = mod.bsc.statusList.OK
-  return { status, session: newUserSession, response: null, redirect: redirectTo }
+  return {
+    status, session: newUserSession, response: null, redirect: redirectTo,
+  }
 }
 
 /**
@@ -96,13 +102,13 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
     return _getErrorResponse(status, error, true)
   }
 
-  if (state !== userSession.oidc['state']) {
+  if (state !== userSession.oidc.state) {
     const status = mod.bsc.statusList.INVALID_SESSION
     const error = 'handle_xlogin_code_state'
     return _getErrorResponse(status, error, true)
   }
 
-  if (iss !== userSession.oidc['iss']) {
+  if (iss !== userSession.oidc.iss) {
     const status = mod.bsc.statusList.INVALID_OIDC_ISSUER
     const error = 'handle_xlogin_code_iss'
     return _getErrorResponse(status, error, true)
@@ -140,9 +146,11 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
   }
 
   const status = mod.bsc.statusList.LOGIN_SUCCESS
-  const redirectTo = mod.lib.addQueryStr(userSession.oidc['redirectAfterAuth'], mod.lib.objToQuery({ code: status }))
+  const redirectTo = mod.lib.addQueryStr(userSession.oidc.redirectAfterAuth, mod.lib.objToQuery({ code: status }))
 
-  return { status, session: { accessToken, userInfo }, response: null, redirect: redirectTo }
+  return {
+    status, session: { accessToken, userInfo }, response: null, redirect: redirectTo,
+  }
 }
 
 /**
@@ -179,11 +187,10 @@ const _endResponse = (req, res, handleResult) => {
 
   if (handleResult.response) {
     return res.json(handleResult.response)
-  } else if (handleResult.redirect) {
+  } if (handleResult.redirect) {
     return res.redirect(handleResult.redirect)
-  } else {
-    return res.redirect(mod.setting.url.ERROR_PAGE)
   }
+  return res.redirect(mod.setting.url.ERROR_PAGE)
 }
 
 /**

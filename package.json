@@ -6,7 +6,8 @@
   "author": "autoaim_jp <git@autoaim.jp>",
   "license": "MIT",
   "scripts": {
-    "gendoc": "yarn jsdoc -c doc/jsdoc/config.json"
+    "gendoc": "yarn jsdoc -c doc/jsdoc/config.json",
+    "lint-server": "yarn eslint *.js core/"
   },
   "type": "module",
   "dependencies": {
