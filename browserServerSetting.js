@@ -18,6 +18,7 @@ export const labelList = {
     service: {
       serviceUserId: 'ユーザーID',
       notification: 'サービス内通知',
+      file: 'ファイル',
     },
     operation: {
       read: '取得',
