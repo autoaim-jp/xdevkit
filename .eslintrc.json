@@ -1,0 +1,77 @@
+{
+  "env": {
+    "es2022": true,
+    "browser": true
+  },
+  "plugins": [
+    "import",
+    "jest"
+  ],
+  "parserOptions": {
+    "parser": "@babel/eslint-parser",
+    "requireConfigFile": false,
+		"ecmaVersion": 13
+  },
+  "extends": "airbnb-base",
+  "rules": {
+    // semi
+    // https://qiita.com/mysticatea/items/9da94240f29ea516ae87
+    "semi": ["error", "never", {"beforeStatementContinuationChars": "never"}],
+    "semi-spacing": ["error", {"after": true, "before": false}],
+    "semi-style": ["error", "first"],
+    "no-extra-semi": "error",
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error",
+
+    // allow require(pathVariable)
+    "import/no-dynamic-require": "off",
+
+    // empty line end of file
+    // https://runebook.dev/ja/docs/eslint/rules/no-multiple-empty-lines
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
+
+    // ok: () => { return x } , ng: () => return x
+    "arrow-body-style": ["error", "always"],
+
+    // allow for-of loop
+    // https://qiita.com/the_red/items/0c826e97b57da6d67621
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+
+    ],
+
+    // allow more than 100 length in line for jsdoc
+    "max-len": "off",
+
+    // allow tail space in comment
+    "no-trailing-spaces": ["error", { "ignoreComments": true }],
+
+    // disallow underscore
+    "no-underscore-dangle": "off",
+
+    // allow console.log
+    "no-console": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(log|warn|error|info|trace)$/]",
+        "message": "Unexpected property on console object was called"
+      }
+    ],
+
+    // disallow no extension
+    "import/extensions": ["error", "always", { "ignorePackages": true }]
+  }
+}

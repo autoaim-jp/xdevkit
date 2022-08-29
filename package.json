@@ -1,16 +1,28 @@
 {
   "name": "xdevkit",
-  "version": "0.7",
+  "version": "0.9",
   "main": "index.js",
   "repository": "git@github.com:/autoaim-jp/xdevkit.git",
   "author": "autoaim_jp <git@autoaim.jp>",
   "license": "MIT",
   "scripts": {
-    "gendoc": "yarn jsdoc -c doc/jsdoc/config.json"
+    "gendoc": "yarn jsdoc -c doc/jsdoc/config.json",
+    "lint-server": "yarn eslint *.js core/"
   },
   "type": "module",
   "dependencies": {
+    "axios": "^0.27.2",
+    "connect-redis": "^6.1.3",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "ioredis": "^5.2.2"
+  },
+  "devDependencies": {
     "jsdoc": "^3.6.11",
-    "tui-jsdoc-template": "^1.2.2"
+    "tui-jsdoc-template": "^1.2.2",
+    "eslint": "^8.22.0",
+    "eslint-plugin-jest": "^26.8.3",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
   }
 }

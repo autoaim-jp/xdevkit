@@ -9,15 +9,16 @@ export const apiEndpoint = '/f'
 export const labelList = {
   scope: {
     global: {
-      'notification': 'すべての通知',
+      notification: 'すべての通知',
     },
     auth: {
-      'emailAddress': 'メールアドレス',
-      'userName': 'ユーザー名',
+      emailAddress: 'メールアドレス',
+      userName: 'ユーザー名',
     },
     service: {
-      'serviceUserId': 'ユーザーID',
-      'notification': 'サービス内通知',
+      serviceUserId: 'ユーザーID',
+      notification: 'サービス内通知',
+      file: 'ファイル',
     },
     operation: {
       read: '取得',
@@ -47,6 +48,8 @@ export const statusList = {
 
   API_ERROR: 1100,
   INVALID_OIDC_ISSUER: 1101,
+
+  NOT_FOUND: 1200,
 }
 
 export const userReadableDateFormat = {
@@ -70,13 +73,14 @@ const settingList = {
  * @param {Array} keyList
  */
 export const get = (...keyList) => {
+  /* eslint-disable no-param-reassign */
   const constantList = keyList.reduce((prev, curr) => {
     prev[curr] = settingList[curr]
     return prev
   }, {})
-  for(const key of keyList) {
-    if(!constantList[key]) {
-      throw new Error('[error] undefined setting constant: ' + key)
+  for (const key of keyList) {
+    if (!constantList[key]) {
+      throw new Error(`[error] undefined setting constant: ${key}`)
     }
   }
   return constantList
