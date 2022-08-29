@@ -1,6 +1,6 @@
 {
   "name": "xdevkit",
-  "version": "0.7",
+  "version": "0.9",
   "main": "index.js",
   "repository": "git@github.com:/autoaim-jp/xdevkit.git",
   "author": "autoaim_jp <git@autoaim.jp>",
