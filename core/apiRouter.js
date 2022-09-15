@@ -123,7 +123,8 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
   }
 
   const accessToken = accessTokenResponse?.data?.result?.accessToken
-  if (accessTokenResponse.error || !accessToken) {
+  const splitPermissionList = accessTokenResponse?.data?.result?.splitPermissionList
+  if (accessTokenResponse.error || !accessToken || !splitPermissionList) {
     const status = mod.bsc.statusList.API_ERROR
     const error = encodeURIComponent(accessTokenResponse.error)
     return _getErrorResponse(status, error, true)
@@ -149,7 +150,7 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
   const redirectTo = mod.lib.addQueryStr(userSession.oidc.redirectAfterAuth, mod.lib.objToQuery({ code: status }))
 
   return {
-    status, session: { accessToken, userInfo }, response: null, redirect: redirectTo,
+    status, session: { accessToken, userInfo, splitPermissionList }, response: null, redirect: redirectTo,
   }
 }
 
