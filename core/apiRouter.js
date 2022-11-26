@@ -57,7 +57,7 @@ const _getErrorResponse = (status, error, isServerRedirect, response = null, ses
  * @memberof core
  * @param {String} redirectAfterAuth
  */
-const _handleXloginConnect = (redirectAfterAuth) => {
+const _handleXloginConnect = (redirectAfterAuth, requestScope) => {
   const oidcSessionPart = {}
   oidcSessionPart.iss = mod.setting.env.AUTH_SERVER_ORIGIN
   oidcSessionPart.codeVerifier = mod.lib.getRandomB64UrlSafe(mod.setting.api.CODE_VERIFIER_L)
@@ -71,6 +71,7 @@ const _handleXloginConnect = (redirectAfterAuth) => {
   oidcQueryParam.scope = mod.setting.api.SCOPE
   oidcQueryParam.clientId = mod.setting.env.CLIENT_ID
   oidcQueryParam.redirectUri = mod.setting.env.SERVER_ORIGIN + mod.setting.url.XLOGIN_REDIRECT_URI
+  oidcQueryParam.requestScope = requestScope
 
   const oidcQueryStr = `?${mod.lib.objToQuery(oidcQueryParam)}`
   const redirectTo = mod.setting.env.AUTH_SERVER_ORIGIN + mod.setting.url.XLOGIN_AUTHORIZATION_ENDPOINT + oidcQueryStr
@@ -203,8 +204,8 @@ export const getApiRouter = () => {
   const expressRouter = mod.express.Router()
 
   expressRouter.get('/f/xlogin/connect', (req, res) => {
-    const { redirectAfterAuth } = req.query
-    const resultHandleXloginConnect = _handleXloginConnect(redirectAfterAuth)
+    const { redirectAfterAuth, requestScope } = req.query
+    const resultHandleXloginConnect = _handleXloginConnect(redirectAfterAuth, requestScope)
     _endResponse(req, res, resultHandleXloginConnect)
   })
 
