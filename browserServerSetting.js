@@ -13,6 +13,7 @@ export const labelList = {
     },
     auth: {
       emailAddress: 'メールアドレス',
+      backupEmailAddress: 'バックアップメールアドレス',
       userName: 'ユーザー名',
     },
     service: {
