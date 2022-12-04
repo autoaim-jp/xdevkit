@@ -1,10 +1,3 @@
-/**
- * /xdevkit/browserServerSetting.js
- *
- * @file 全てのサービスの、ブラウザとサーバーで共通の定数を定義するファイル。
- * @namespace browserServerSetting
- */
-
 export const apiEndpoint = '/f'
 export const labelList = {
   scope: {
