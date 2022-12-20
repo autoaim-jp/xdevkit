@@ -1,25 +1,48 @@
 export const apiEndpoint = '/f'
 export const labelList = {
-  scope: {
+  scopeBody: {
     global: {
-      notification: 'すべての通知',
+      notification: {
+        label: 'すべての通知',
+        summary: 'すべてのサービスの通知に関する権限です。ログイン時刻などを含みます。',
+      },
     },
     auth: {
-      emailAddress: 'メールアドレス',
-      backupEmailAddress: 'バックアップメールアドレス',
-      userName: 'ユーザー名',
+      emailAddress: {
+        label: 'メールアドレス',
+        summary: 'ログインに使用するメールアドレスに関する権限です。バックアップメールアドレスは含みません。',
+      },
+      backupEmailAddress: {
+        label: 'バックアップメールアドレス',
+        summary: 'バックアップメールアドレスに関する権限です。ログインに使用するメールアドレスは含みません。',
+      },
+      userName: {
+        label: 'ユーザー名',
+        summary: '一般公開されているユーザーの名前です。',
+      },
     },
     service: {
-      serviceUserId: 'ユーザーID',
-      notification: 'サービス内通知',
-      file: 'ファイル',
+      serviceUserId: {
+        label: 'ユーザーID',
+        summary: '連携するサービスに提供する、あなたのアカウントのIDです。サービス毎に異なります。',
+      },
+      notification: {
+        label: 'サービス内通知',
+        summary: '連携するサービス内で、通知機能を利用するための権限です。',
+      },
+      file: {
+        label: 'ファイル',
+        summary: '連携するサービスで、あなたがデータを保存できます。',
+      },
     },
+  },
+  scopeOperation: {
     operation: {
       read: '取得',
       write: '保存',
       append: '追記',
     },
-    other: {
+    prefix: {
       isRequired: '必須',
     },
   },
