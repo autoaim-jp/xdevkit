@@ -44,15 +44,16 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
   return new Promise((resolve) => {
     const query = param && objToQuery(param)
     const queryString = query ? `?${query}` : ''
+    const pathWithQueryString = `${path}${isPost ? '' : queryString}`
     const contentHash = calcSha256AsB64(JSON.stringify(param))
     const timestamp = Date.now()
-    const dataToSign = `${timestamp}:${path}:${contentHash}`
+    const dataToSign = `${timestamp}:${pathWithQueryString}:${contentHash}`
     const signature = calcSha256HmacAsB64(process.env.CLIENT_SECRET, dataToSign)
     const url = origin + path
 
     const opt = {
       method: isPost ? 'POST' : 'GET',
-      url: url + (isPost ? '' : queryString),
+      url: url + pathWithQueryString,
       headers: { 
         ...header, 
         'x-xlogin-timestamp': timestamp,
