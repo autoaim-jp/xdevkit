@@ -42,7 +42,7 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
   }
 
   return new Promise((resolve) => {
-    const query = param && Object.keys(param).map((key) => { return `${key}=${param[key]}` }).join('&')
+    const query = param && objToQuery(param)
     const queryString = query ? `?${query}` : ''
     const contentHash = calcSha256AsB64(JSON.stringify(param))
     const timestamp = Date.now()
@@ -131,15 +131,14 @@ const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
   }
 
   const { clientId, state, codeVerifier } = oidcSessionPart
-  const oidcQueryStr = objToQuery({
+  const param = {
     clientId, state, code, codeVerifier,
-  })
-  const requestPath = `${path}?${oidcQueryStr}`
+  }
   const header = {
     'x-xlogin-client-id': clientId,
   }
 
-  return apiRequest(false, origin, requestPath, {}, header, true)
+  return apiRequest(false, origin, path, param, header, true)
 }
 
 /**
