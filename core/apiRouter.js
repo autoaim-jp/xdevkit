@@ -116,7 +116,7 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
   }
 
   /* request accessToken */
-  const accessTokenResponse = await mod.lib.getAccessTokenByCode(code, userSession.oidc, mod.setting.env.API_SERVER_ORIGIN + mod.setting.url.XLOGIN_CODE_ENDPOINT)
+  const accessTokenResponse = await mod.lib.getAccessTokenByCode(code, userSession.oidc, mod.setting.env.API_SERVER_ORIGIN, mod.setting.url.XLOGIN_CODE_ENDPOINT)
   if (!accessTokenResponse) {
     const status = mod.bsc.statusList.INVALID_SESSION
     const error = 'handle_xlogin_code_access_token'
@@ -133,7 +133,7 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
 
   /* request userInfo */
   const filterKeyList = mod.setting.api.SCOPE.split(',').map((row) => { return row.split(':').slice(1).join(':') })
-  const userInfoResponse = await mod.lib.getUserInfo(mod.setting.env.CLIENT_ID, filterKeyList, accessToken, mod.setting.env.API_SERVER_ORIGIN + mod.setting.url.XLOGIN_USER_INFO_ENDPOINT)
+  const userInfoResponse = await mod.lib.getUserInfo(mod.setting.env.CLIENT_ID, filterKeyList, accessToken, mod.setting.env.API_SERVER_ORIGIN, mod.setting.url.XLOGIN_USER_INFO_ENDPOINT)
   if (!userInfoResponse) {
     const status = mod.bsc.statusList.INVALID_SESSION
     const error = 'handle_xlogin_code_user_info'

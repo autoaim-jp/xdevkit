@@ -23,19 +23,42 @@ const init = (crypto, axios) => {
  *
  * @memberof lib
  * @param {Boolean} isPost
- * @param {String} url
+ * @param {String} origin
+ * @param {String} path
  * @param {Object} param
  * @param {Object} header
  * @param {Boolean} json
  */
-const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
+const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) => {
+  const calcSha256AsB64 = (str) => {
+    const sha256 = mod.crypto.createHash('sha256')
+    sha256.update(str)
+    return sha256.digest('base64')
+  }
+  const calcSha256HmacAsB64 = (secret, str) => {
+    const sha256Hmac = mod.crypto.createHmac('sha256', secret)
+    sha256Hmac.update(str)
+    return sha256Hmac.digest('base64')
+  }
+
   return new Promise((resolve) => {
     const query = param && Object.keys(param).map((key) => { return `${key}=${param[key]}` }).join('&')
     const queryString = query ? `?${query}` : ''
+    const contentHash = calcSha256AsB64(JSON.stringify(param))
+    const timestamp = Date.now()
+    const dataToSign = `${timestamp}:${path}:${contentHash}`
+    const signature = calcSha256HmacAsB64(process.env.CLIENT_SECRET, dataToSign)
+    const url = origin + path
+
     const opt = {
       method: isPost ? 'POST' : 'GET',
       url: url + (isPost ? '' : queryString),
-      headers: { ...header },
+      headers: { 
+        ...header, 
+        'x-xlogin-timestamp': timestamp,
+        'x-xlogin-signature': signature,
+        'tmp-dataToSign': dataToSign,
+      },
       timeout: 30 * 1000,
     }
     if (json) {
@@ -53,7 +76,6 @@ const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
       })
   })
 }
-
 
 /**
  * 指定した文字数のランダム文字列(base64urlエンコード)を生成する。
@@ -103,7 +125,7 @@ const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
  * @param {Object} oidcSessionPart
  * @param {String} endpoint
  */
-const getAccessTokenByCode = (code, oidcSessionPart, endpoint) => {
+const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
   if (!code || !oidcSessionPart.clientId || !oidcSessionPart.state || !oidcSessionPart.codeVerifier) {
     return null
   }
@@ -112,9 +134,9 @@ const getAccessTokenByCode = (code, oidcSessionPart, endpoint) => {
   const oidcQueryStr = objToQuery({
     clientId, state, code, codeVerifier,
   })
-  const reqUrl = `${endpoint}?${oidcQueryStr}`
+  const requestPath = `${path}?${oidcQueryStr}`
 
-  return apiRequest(false, reqUrl, {}, {}, true)
+  return apiRequest(false, origin, requestPath, {}, {}, true)
 }
 
 /**
@@ -126,7 +148,7 @@ const getAccessTokenByCode = (code, oidcSessionPart, endpoint) => {
  * @param {String} accessToken
  * @param {String} endpoint
  */
-const getUserInfo = (clientId, filterKeyList, accessToken, endpoint) => {
+const getUserInfo = (clientId, filterKeyList, accessToken, origin, path) => {
   if (!accessToken) {
     return null
   }
@@ -139,7 +161,7 @@ const getUserInfo = (clientId, filterKeyList, accessToken, endpoint) => {
   const param = {
     filterKeyListStr,
   }
-  return apiRequest(false, endpoint, param, header, true)
+  return apiRequest(false, origin, path, param, header, true)
 }
 
 /**
