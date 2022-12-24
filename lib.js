@@ -49,11 +49,11 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
     const timestamp = Date.now()
     const dataToSign = `${timestamp}:${pathWithQueryString}:${contentHash}`
     const signature = calcSha256HmacAsB64(process.env.CLIENT_SECRET, dataToSign)
-    const url = origin + path
+    const url = origin + pathWithQueryString
 
     const opt = {
       method: isPost ? 'POST' : 'GET',
-      url: url + pathWithQueryString,
+      url,
       headers: { 
         ...header, 
         'x-xlogin-timestamp': timestamp,
