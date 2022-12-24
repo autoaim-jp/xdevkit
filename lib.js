@@ -45,7 +45,7 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
     const query = param && objToQuery(param)
     const queryString = query ? `?${query}` : ''
     const pathWithQueryString = `${path}${isPost ? '' : queryString}`
-    const contentHash = calcSha256AsB64(JSON.stringify(param))
+    const contentHash = calcSha256AsB64(JSON.stringify(isPost ? param : {}))
     const timestamp = Date.now()
     const dataToSign = `${timestamp}:${pathWithQueryString}:${contentHash}`
     const signature = calcSha256HmacAsB64(process.env.CLIENT_SECRET, dataToSign)
