@@ -135,8 +135,11 @@ const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
     clientId, state, code, codeVerifier,
   })
   const requestPath = `${path}?${oidcQueryStr}`
+  const header = {
+    'x-xlogin-client-id': clientId,
+  }
 
-  return apiRequest(false, origin, requestPath, {}, {}, true)
+  return apiRequest(false, origin, requestPath, {}, header, true)
 }
 
 /**
