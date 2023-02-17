@@ -19,23 +19,57 @@ const init = (crypto, axios) => {
 }
 
 /**
+ * オブジェクト型の変数を、GETリクエストパラメータの形に変換する。
+ *
+ * @memberof lib
+ * @param {Object} obj
+ */
+const objToQuery = (obj) => {
+  return Object.entries(obj).map(([key, value]) => { return `${key}=${value}` }).join('&')
+}
+
+/**
  * axiosで指定したurlにHTTPリクエストを送信する。
  *
  * @memberof lib
  * @param {Boolean} isPost
- * @param {String} url
+ * @param {String} origin
+ * @param {String} path
  * @param {Object} param
  * @param {Object} header
  * @param {Boolean} json
  */
-const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
+const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) => {
+  const calcSha256AsB64 = (str) => {
+    const sha256 = mod.crypto.createHash('sha256')
+    sha256.update(str)
+    return sha256.digest('base64')
+  }
+  const calcSha256HmacAsB64 = (secret, str) => {
+    const sha256Hmac = mod.crypto.createHmac('sha256', secret)
+    sha256Hmac.update(str)
+    return sha256Hmac.digest('base64')
+  }
+
   return new Promise((resolve) => {
-    const query = param && Object.keys(param).map((key) => { return `${key}=${param[key]}` }).join('&')
+    const query = param && objToQuery(param)
     const queryString = query ? `?${query}` : ''
+    const pathWithQueryString = `${path}${isPost ? '' : queryString}`
+    const contentHash = calcSha256AsB64(JSON.stringify(isPost ? param : {}))
+    const timestamp = Date.now()
+    const dataToSign = `${timestamp}:${pathWithQueryString}:${contentHash}`
+    const signature = calcSha256HmacAsB64(process.env.CLIENT_SECRET, dataToSign)
+    const url = origin + pathWithQueryString
+
     const opt = {
       method: isPost ? 'POST' : 'GET',
-      url: url + (isPost ? '' : queryString),
-      headers: { ...header },
+      url,
+      headers: {
+        ...header,
+        'x-xlogin-timestamp': timestamp,
+        'x-xlogin-signature': signature,
+        'tmp-dataToSign': dataToSign,
+      },
       timeout: 30 * 1000,
     }
     if (json) {
@@ -54,7 +88,6 @@ const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
   })
 }
 
-
 /**
  * 指定した文字数のランダム文字列(base64urlエンコード)を生成する。
  *
@@ -63,16 +96,6 @@ const apiRequest = (isPost, url, param = {}, header = {}, json = true) => {
  */
 const getRandomB64UrlSafe = (len) => {
   return mod.crypto.randomBytes(len).toString('base64url').slice(0, len)
-}
-
-/**
- * オブジェクト型の変数を、GETリクエストパラメータの形に変換する。
- *
- * @memberof lib
- * @param {Object} obj
- */
-const objToQuery = (obj) => {
-  return Object.entries(obj).map(([key, value]) => { return `${key}=${value}` }).join('&')
 }
 
 /**
@@ -103,18 +126,20 @@ const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
  * @param {Object} oidcSessionPart
  * @param {String} endpoint
  */
-const getAccessTokenByCode = (code, oidcSessionPart, endpoint) => {
+const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
   if (!code || !oidcSessionPart.clientId || !oidcSessionPart.state || !oidcSessionPart.codeVerifier) {
     return null
   }
 
   const { clientId, state, codeVerifier } = oidcSessionPart
-  const oidcQueryStr = objToQuery({
+  const param = {
     clientId, state, code, codeVerifier,
-  })
-  const reqUrl = `${endpoint}?${oidcQueryStr}`
+  }
+  const header = {
+    'x-xlogin-client-id': clientId,
+  }
 
-  return apiRequest(false, reqUrl, {}, {}, true)
+  return apiRequest(false, origin, path, param, header, true)
 }
 
 /**
@@ -126,7 +151,7 @@ const getAccessTokenByCode = (code, oidcSessionPart, endpoint) => {
  * @param {String} accessToken
  * @param {String} endpoint
  */
-const getUserInfo = (clientId, filterKeyList, accessToken, endpoint) => {
+const getUserInfo = (clientId, filterKeyList, accessToken, origin, path) => {
   if (!accessToken) {
     return null
   }
@@ -139,7 +164,7 @@ const getUserInfo = (clientId, filterKeyList, accessToken, endpoint) => {
   const param = {
     filterKeyListStr,
   }
-  return apiRequest(false, endpoint, param, header, true)
+  return apiRequest(false, origin, path, param, header, true)
 }
 
 /**
@@ -158,9 +183,9 @@ const addQueryStr = (url, queryStr) => {
 
 export default {
   init,
+  objToQuery,
   apiRequest,
   getRandomB64UrlSafe,
-  objToQuery,
   convertToCodeChallenge,
   getAccessTokenByCode,
   getUserInfo,
