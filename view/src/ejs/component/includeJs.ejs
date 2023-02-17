@@ -1,0 +1,16 @@
+    <% externalScriptList.forEach((value, key) => { %>
+      <% const scriptLoadLine = '<script type=\'module\' src=\'' + value + '\'></script>' %>
+      <%- scriptLoadLine %> 
+    <% }); %>
+
+    <% inlineScriptList.forEach((value, key) => { %>
+      <% if(isProduction) { %>
+        <% const scriptIncludeLine = '<script>\n' + value + '\n</script>' %>
+        <%- scriptIncludeLine %>
+      <% } else { %>
+        <% const scriptLoadLine = '<script type=\'module\' src=\'' + value + '\'></script>' %>
+        <%- scriptLoadLine %> 
+      <% } %>
+    <% }); %>
+
+
