@@ -19,6 +19,16 @@ const init = (crypto, axios) => {
 }
 
 /**
+ * オブジェクト型の変数を、GETリクエストパラメータの形に変換する。
+ *
+ * @memberof lib
+ * @param {Object} obj
+ */
+const objToQuery = (obj) => {
+  return Object.entries(obj).map(([key, value]) => { return `${key}=${value}` }).join('&')
+}
+
+/**
  * axiosで指定したurlにHTTPリクエストを送信する。
  *
  * @memberof lib
@@ -54,8 +64,8 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
     const opt = {
       method: isPost ? 'POST' : 'GET',
       url,
-      headers: { 
-        ...header, 
+      headers: {
+        ...header,
         'x-xlogin-timestamp': timestamp,
         'x-xlogin-signature': signature,
         'tmp-dataToSign': dataToSign,
@@ -86,16 +96,6 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
  */
 const getRandomB64UrlSafe = (len) => {
   return mod.crypto.randomBytes(len).toString('base64url').slice(0, len)
-}
-
-/**
- * オブジェクト型の変数を、GETリクエストパラメータの形に変換する。
- *
- * @memberof lib
- * @param {Object} obj
- */
-const objToQuery = (obj) => {
-  return Object.entries(obj).map(([key, value]) => { return `${key}=${value}` }).join('&')
 }
 
 /**
@@ -183,9 +183,9 @@ const addQueryStr = (url, queryStr) => {
 
 export default {
   init,
+  objToQuery,
   apiRequest,
   getRandomB64UrlSafe,
-  objToQuery,
   convertToCodeChallenge,
   getAccessTokenByCode,
   getUserInfo,

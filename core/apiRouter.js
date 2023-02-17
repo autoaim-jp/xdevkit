@@ -71,7 +71,7 @@ const _handleXloginConnect = (redirectAfterAuth, requestScope) => {
   oidcQueryParam.scope = mod.setting.api.SCOPE
   oidcQueryParam.clientId = mod.setting.env.CLIENT_ID
   oidcQueryParam.redirectUri = mod.setting.env.SERVER_ORIGIN + mod.setting.url.XLOGIN_REDIRECT_URI
-  oidcQueryParam.requestScope = requestScope || '' 
+  oidcQueryParam.requestScope = requestScope || ''
 
   const oidcQueryStr = `?${mod.lib.objToQuery(oidcQueryParam)}`
   const redirectTo = mod.setting.env.AUTH_SERVER_ORIGIN + mod.setting.url.XLOGIN_AUTHORIZATION_ENDPOINT + oidcQueryStr
