@@ -1,0 +1,15 @@
+    <% externalCssList.forEach((value, key) => { %>
+      <% const cssHrefLine = '<link href=\'' + value + '\' rel=\'stylesheet\' />' %>
+      <%- cssHrefLine %> 
+    <% }); %>
+    <% inlineCssList.forEach((value, key) => { %>
+      <% if(isProduction) { %>
+        <% const cssIncludeLine = '<style>\n' + value + '\n</style>' %>
+        <%- cssIncludeLine %>
+      <% } else { %>
+        <% const cssHrefLine = '<link href=\'' + value + '\' rel=\'stylesheet\' />' %>
+        <%- cssHrefLine %> 
+      <% } %>
+    <% }); %>
+
+
