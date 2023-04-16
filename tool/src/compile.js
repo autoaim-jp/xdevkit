@@ -6,7 +6,7 @@ import fs from 'fs'
 import path from 'path'
 import { program } from 'commander'
 import { spawn } from 'child_process'
-import uglifyjs from 'uglify-js'
+// import uglifyjs from 'uglify-js'
 import ejs from 'ejs'
 import cleancss from 'clean-css'
 import htmlMinifier from 'html-minifier'
@@ -167,7 +167,7 @@ const buildPageEjs = async (filePath, ejsConfig, EJS_PATH_OUT, MINIFY_HTML) => {
       removeTagWhitespace: true,
       useShortDoctype: true,
       minifyCSS: true,
-      minifyJS: true,
+      minifyJS: false, // to prevent error
     })
     fs.writeFileSync(buildHtmlPath, htmlMinified)
     /*

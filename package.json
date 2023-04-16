@@ -20,8 +20,7 @@
     "express-session": "^1.17.3",
     "html-minifier": "^4.0.0",
     "ioredis": "^5.2.2",
-    "js-beautify": "^1.14.7",
-    "uglify-js": "^3.17.4"
+    "js-beautify": "^1.14.7"
   },
   "devDependencies": {
     "eslint": "^8.22.0",
