@@ -63,8 +63,7 @@ const buildAllJs = async (JS_PATH_IN, JS_PATH_OUT, IGNORE_SRC_JS_DIR_LIST) => {
   const promiseList = []
 	for(const dirEntry of fs.readdirSync(JS_PATH_IN, { withFileTypes: true })) {
     if(dirEntry.isDirectory() && IGNORE_SRC_JS_DIR_LIST.indexOf(dirEntry.name) < 0) {
-      promiseList.push(buildPageJs(JS_PATH_IN + dirEntry.name + '/app.js', JS_PATH_OUT))
-    }
+      promiseList.push(buildPageJs(JS_PATH_IN + dirEntry.name + '/app.js', JS_PATH_OUT)) }
   }
   await Promise.all(promiseList)
 }
@@ -77,13 +76,17 @@ const buildPageJs = async (filePath, JS_PATH_OUT) => {
   console.log('[info] new build min script path:', buildMinPath)
   const p = await fork(['esbuild', appPath, '--outfile=' + buildMinPath, '--bundle'])
 
+  /*
   const minifiedSource = uglifyjs.minify(fs.readFileSync(buildMinPath, 'utf-8'))
   fs.writeFileSync(buildMinPath, minifiedSource.code)
+  */
   /*
   const minifiedSource = []
   const p2 = await fork(['uglifyjs', '--compress', '--', buildMinPath], minifiedSource)
   fs.writeFileSync(buildMinPath, minifiedSource.join('\n'))
   */
+  const jsBeautified = jsbeautify.js(fs.readFileSync(buildMinPath, 'utf-8'), {})
+  fs.writeFileSync(buildMinPath, jsBeautified)
 }
 
 
