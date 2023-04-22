@@ -107,6 +107,7 @@ const watchPageJsHandler = (jsSourceDirPath, jsBuildDirPath) => {
     const buildJsPath = jsBuildDirPath + filePath.replace(jsSourceDirPath, '')
     console.log('[info] new script filePath:', buildJsPath)
     setTimeout(() => {
+      fs.mkdirSync(path.dirname(buildJsPath), { recursive: true })
       fs.copyFileSync(filePath, buildJsPath)
     }, 300) 
   }
@@ -227,6 +228,7 @@ const compilePageCssHandler = (cssBuildDirPath, tailwindConfigPath, tailwindCssP
       const p = await fork(['NODE_ENV=production', 'tailwindcss', 'build', '-c', tailwindConfigPath, '-i', filePath, '-o', buildCssPath])
     } else {
       console.log('[info] new css filePath:', buildCssPath)
+      fs.mkdirSync(path.dirname(buildCssPath), { recursive: true })
       fs.copyFileSync(filePath, buildCssPath)
     }
 
@@ -248,6 +250,7 @@ const watchPageCssHandler = (cssBuildDirPath, tailwindConfigPath, tailwindCssPat
       const p = await fork(['NODE_ENV=dev', 'tailwindcss', 'build', '-c', tailwindConfigPath, '-i', filePath, '-o', buildCssPath])
     } else {
       console.log('[info] new css filePath:', buildCssPath)
+      fs.mkdirSync(path.dirname(buildCssPath), { recursive: true })
       fs.copyFileSync(filePath, buildCssPath)
     }
 
