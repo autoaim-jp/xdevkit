@@ -10,7 +10,7 @@ import uglifyjs from 'uglify-js'
 import ejs from 'ejs'
 import cleancss from 'clean-css'
 import htmlMinifier from 'html-minifier'
-// import jsbeautify from 'js-beautify'
+import jsbeautify from 'js-beautify'
 import { fileURLToPath } from 'url'
 
 const cacheForWatch = {}
