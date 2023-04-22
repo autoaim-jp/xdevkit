@@ -11,6 +11,7 @@ import ejs from 'ejs'
 import cleancss from 'clean-css'
 import htmlMinifier from 'html-minifier'
 import jsbeautify from 'js-beautify'
+import { fileURLToPath } from 'url'
 
 const cacheForWatch = {}
 
@@ -365,7 +366,8 @@ const main = async () => {
     startWatcher(ejsSourceDirPath, [
       { regexp: /\.ejs$/, action: watchPageEjsHandler(ejsConfig, ejsBuildDirPath), },
     ])
-    startWatcher(configFilePath, [
+    const __dirname = path.dirname(fileURLToPath(import.meta.url))
+    startWatcher(__dirname + '/' + configFilePath, [
       { regexp: /\.(js|ts)$/, action: watchEjsConfigHandler(), },
     ])
   }
