@@ -6,11 +6,11 @@ import fs from 'fs'
 import path from 'path'
 import { program } from 'commander'
 import { spawn } from 'child_process'
-// import uglifyjs from 'uglify-js'
+import uglifyjs from 'uglify-js'
 import ejs from 'ejs'
 import cleancss from 'clean-css'
 import htmlMinifier from 'html-minifier'
-import jsbeautify from 'js-beautify'
+// import jsbeautify from 'js-beautify'
 import { fileURLToPath } from 'url'
 
 const cacheForWatch = {}
@@ -88,17 +88,17 @@ const compilePageJsHandler = (jsBuildDirPath) => {
     console.log('[info] new build min script path:', buildMinPath)
     const p = await fork(['esbuild', appPath, '--outfile=' + buildMinPath, '--bundle'])
 
+    const minifiedSource = uglifyjs.minify(fs.readFileSync(buildMinPath, 'utf-8'), { compress: true, mangle: false })
+    fs.writeFileSync(buildMinPath, minifiedSource.code)
     /*
-  const minifiedSource = uglifyjs.minify(fs.readFileSync(buildMinPath, 'utf-8'))
-  fs.writeFileSync(buildMinPath, minifiedSource.code)
-  */
+    const minifiedSource = []
+    const p2 = await fork(['uglifyjs', '--compress', '--', buildMinPath], minifiedSource)
+    fs.writeFileSync(buildMinPath, minifiedSource.join('\n'))
+    */
     /*
-  const minifiedSource = []
-  const p2 = await fork(['uglifyjs', '--compress', '--', buildMinPath], minifiedSource)
-  fs.writeFileSync(buildMinPath, minifiedSource.join('\n'))
-  */
     const jsBeautified = jsbeautify.js(fs.readFileSync(buildMinPath, 'utf-8'), {})
     fs.writeFileSync(buildMinPath, jsBeautified)
+    */
   }
 }
 
