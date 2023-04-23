@@ -73,10 +73,10 @@ const removeBuildDir = (jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath) => {
 const buildAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action, isRecursive) => {
   const promiseList = []
   for(const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
-    if(jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
+    if(!dirEntry.isDirectory() && jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
       promiseList.push(action(jsSourceDirPath + dirEntry.name + '/app.js')) 
     } else if(isRecursive && dirEntry.isDirectory()) {
-      await buildAllJs(jsSourceDirPath + dirEntry.name + '/', [], action)
+      await buildAllJs(jsSourceDirPath + dirEntry.name + '/', [], action, isRecursive)
     }
   }
   await Promise.all(promiseList)
