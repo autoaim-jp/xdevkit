@@ -70,13 +70,13 @@ const removeBuildDir = (jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath) => {
 }
 
 /* js */
-const buildAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
+const buildAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action, isRecursive) => {
   const promiseList = []
   for(const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
     if(jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
       promiseList.push(action(jsSourceDirPath + dirEntry.name + '/app.js')) 
-    } else if(dirEntry.isDirectory()) {
-      buildAllJs(jsSourceDirPath + dirEntry.name + '/', [], action)
+    } else if(isRecursive && dirEntry.isDirectory()) {
+      await buildAllJs(jsSourceDirPath + dirEntry.name + '/', [], action)
     }
   }
   await Promise.all(promiseList)
@@ -352,14 +352,14 @@ const main = async () => {
 
   if (command === 'compile') {
     removeBuildDir(jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath)
-    await buildAllJs(jsSourceDirPath, jsIgnoreDirPath, compilePageJsHandler(jsBuildDirPath))
+    await buildAllJs(jsSourceDirPath, jsIgnoreDirPath, compilePageJsHandler(jsBuildDirPath), true)
     await buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(ejsConfig, ejsBuildDirPath))
     await buildAllCss(cssSourceDirPath, compilePageCssHandler(cssBuildDirPath, tailwindConfigPath, tailwindCssPath))
     await buildAllEjs(ejsSourceDirPath, compilePageEjsHandler(ejsConfig, ejsBuildDirPath, isMinifyMode))
   }
 
   if (command === 'watch') {
-    await buildAllJs(jsSourceDirPath, jsIgnoreDirPath, watchPageJsHandler(jsSourceDirPath, jsBuildDirPath))
+    await buildAllJs(jsSourceDirPath, jsIgnoreDirPath, watchPageJsHandler(jsSourceDirPath, jsBuildDirPath), false)
     await buildAllCss(cssSourceDirPath, watchPageCssHandler(cssBuildDirPath, tailwindConfigPath, tailwindCssPath))
     await buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(ejsConfig, ejsBuildDirPath))
 
