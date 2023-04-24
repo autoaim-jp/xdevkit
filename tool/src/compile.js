@@ -70,29 +70,41 @@ const removeBuildDir = (jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath) => {
 }
 
 /* js */
-const buildAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action, isRecursive) => {
+const compileAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
   const promiseList = []
   for(const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
-    if(!dirEntry.isDirectory() && jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
+    if(dirEntry.isDirectory() && jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
       promiseList.push(action(jsSourceDirPath + dirEntry.name + '/app.js')) 
-    } else if(isRecursive && dirEntry.isDirectory()) {
-      await buildAllJs(jsSourceDirPath + dirEntry.name + '/', [], action, isRecursive)
     }
   }
   await Promise.all(promiseList)
 }
 
-const compilePageJsHandler = (jsBuildDirPath) => {
+const watchAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
+  const promiseList = []
+  for(const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
+    if(dirEntry.isDirectory()) {
+      promiseList.push(watchAllJs(jsSourceDirPath + dirEntry.name + '/', jsIgnoreDirPath, action))
+    } else {
+      promiseList.push(action(jsSourceDirPath + dirEntry.name)) 
+    }
+  }
+  await Promise.all(promiseList)
+}
+
+const compilePageJsHandler = (jsBuildDirPath, isMinifyMode) => {
   return async (filePath) => {
     console.log('buildPageJs:', filePath)
     const appPath = filePath.replace(/^(.*)\/([^\/]*)\/[^\/]*\.js$/g, '$1\/$2\/app.js')
     const buildMinPath = jsBuildDirPath + filePath.replace(/^(.*)\/([^\/]*)\/[^\/]*\.js$/g, '$2') + '/app.js'
     console.log('[info] page script updated:', filePath)
     console.log('[info] new build min script path:', buildMinPath)
-    const p = await fork(['esbuild', appPath, '--outfile=' + buildMinPath, '--bundle'])
+    const p = await fork(['esbuild', appPath, '--outfile=' + buildMinPath, '--keep-names', '--bundle'])
 
-    const minifiedSource = uglifyjs.minify(fs.readFileSync(buildMinPath, 'utf-8'), { compress: true, mangle: false })
-    fs.writeFileSync(buildMinPath, minifiedSource.code)
+    if (isMinifyMode) {
+      const minifiedSource = uglifyjs.minify(fs.readFileSync(buildMinPath, 'utf-8'), {})
+      fs.writeFileSync(buildMinPath, minifiedSource.code)
+    }
     /*
     const minifiedSource = []
     const p2 = await fork(['uglifyjs', '--compress', '--', buildMinPath], minifiedSource)
@@ -352,14 +364,14 @@ const main = async () => {
 
   if (command === 'compile') {
     removeBuildDir(jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath)
-    await buildAllJs(jsSourceDirPath, jsIgnoreDirPath, compilePageJsHandler(jsBuildDirPath), true)
+    await compileAllJs(jsSourceDirPath, jsIgnoreDirPath, compilePageJsHandler(jsBuildDirPath, isMinifyMode))
     await buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(ejsConfig, ejsBuildDirPath))
     await buildAllCss(cssSourceDirPath, compilePageCssHandler(cssBuildDirPath, tailwindConfigPath, tailwindCssPath))
     await buildAllEjs(ejsSourceDirPath, compilePageEjsHandler(ejsConfig, ejsBuildDirPath, isMinifyMode))
   }
 
   if (command === 'watch') {
-    await buildAllJs(jsSourceDirPath, jsIgnoreDirPath, watchPageJsHandler(jsSourceDirPath, jsBuildDirPath), false)
+    await watchAllJs(jsSourceDirPath, jsIgnoreDirPath, watchPageJsHandler(jsSourceDirPath, jsBuildDirPath))
     await buildAllCss(cssSourceDirPath, watchPageCssHandler(cssBuildDirPath, tailwindConfigPath, tailwindCssPath))
     await buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(ejsConfig, ejsBuildDirPath))
 
