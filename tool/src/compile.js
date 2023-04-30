@@ -8,7 +8,7 @@ import { program } from 'commander'
 import { spawn } from 'child_process'
 import uglifyjs from 'uglify-js'
 import ejs from 'ejs'
-import cleancss from 'clean-css'
+import Cleancss from 'clean-css'
 import htmlMinifier from 'html-minifier'
 import jsbeautify from 'js-beautify'
 import { fileURLToPath } from 'url'
@@ -17,8 +17,8 @@ const cacheForWatch = {}
 
 /* lib */
 const fork = (command, list = []) => {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(command[0], command.slice(1), { shell: true, })
+  return new Promise((resolve) => {
+    const proc = spawn(command[0], command.slice(1), { shell: true })
     console.log('start:', command)
 
     proc.stderr.on('data', (err) => {
@@ -37,7 +37,7 @@ const fork = (command, list = []) => {
 }
 
 const awaitSleep = (ms) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve()
     }, ms)
@@ -50,21 +50,21 @@ const removeBuildDir = (jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath) => {
     fs.emptyDirSync(jsBuildDirPath)
     console.log('[info] remove dir:', jsBuildDirPath)
     fs.mkdirSync(jsBuildDirPath)
-  } catch(e) {
+  } catch (e) {
     console.log('[info] dir is empty:', jsBuildDirPath)
   }
   try {
     fs.emptyDirSync(cssBuildDirPath)
     console.log('[info] remove dir:', cssBuildDirPath)
     fs.mkdirSync(cssBuildDirPath)
-  } catch(e) {
+  } catch (e) {
     console.log('[info] dir is empty:', cssBuildDirPath)
   }
   try {
     fs.emptyDirSync(ejsBuildDirPath)
     console.log('[info] remove dir:', ejsBuildDirPath)
     fs.mkdirSync(ejsBuildDirPath)
-  } catch(e) {
+  } catch (e) {
     console.log('[info] dir is empty:', ejsBuildDirPath)
   }
 }
@@ -72,9 +72,9 @@ const removeBuildDir = (jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath) => {
 /* js */
 const compileAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
   const promiseList = []
-  for(const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
-    if(dirEntry.isDirectory() && jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
-      promiseList.push(action(jsSourceDirPath + dirEntry.name + '/app.js')) 
+  for (const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
+    if (dirEntry.isDirectory() && jsIgnoreDirPath.indexOf(dirEntry.name) < 0) {
+      promiseList.push(action(`${jsSourceDirPath + dirEntry.name}/app.js`))
     }
   }
   await Promise.all(promiseList)
@@ -82,11 +82,11 @@ const compileAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
 
 const watchAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
   const promiseList = []
-  for(const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
-    if(dirEntry.isDirectory()) {
-      promiseList.push(watchAllJs(jsSourceDirPath + dirEntry.name + '/', jsIgnoreDirPath, action))
+  for (const dirEntry of fs.readdirSync(jsSourceDirPath, { withFileTypes: true })) {
+    if (dirEntry.isDirectory()) {
+      promiseList.push(watchAllJs(`${jsSourceDirPath + dirEntry.name}/`, jsIgnoreDirPath, action))
     } else {
-      promiseList.push(action(jsSourceDirPath + dirEntry.name)) 
+      promiseList.push(action(jsSourceDirPath + dirEntry.name))
     }
   }
   await Promise.all(promiseList)
@@ -95,11 +95,11 @@ const watchAllJs = async (jsSourceDirPath, jsIgnoreDirPath, action) => {
 const compilePageJsHandler = (jsBuildDirPath, isMinifyMode) => {
   return async (filePath) => {
     console.log('buildPageJs:', filePath)
-    const appPath = filePath.replace(/^(.*)\/([^\/]*)\/[^\/]*\.js$/g, '$1\/$2\/app.js')
-    const buildMinPath = jsBuildDirPath + filePath.replace(/^(.*)\/([^\/]*)\/[^\/]*\.js$/g, '$2') + '/app.js'
+    const appPath = filePath.replace(/^(.*)\/([^/]*)\/[^/]*\.js$/g, '$1/$2/app.js')
+    const buildMinPath = `${jsBuildDirPath + filePath.replace(/^(.*)\/([^/]*)\/[^/]*\.js$/g, '$2')}/app.js`
     console.log('[info] page script updated:', filePath)
     console.log('[info] new build min script path:', buildMinPath)
-    const p = await fork(['esbuild', appPath, '--outfile=' + buildMinPath, '--keep-names', '--bundle'])
+    await fork(['esbuild', appPath, `--outfile=${buildMinPath}`, '--keep-names', '--bundle'])
 
     if (isMinifyMode) {
       const minifiedSource = uglifyjs.minify(fs.readFileSync(buildMinPath, 'utf-8'), {})
@@ -123,13 +123,13 @@ const watchPageJsHandler = (regexp, jsSourceDirPath, jsBuildDirPath) => {
     console.log('[info] new script filePath:', buildJsPath)
     await awaitSleep(500)
     fs.mkdirSync(path.dirname(buildJsPath), { recursive: true })
-    for (let i = 0; i < 3; i++) {
+    for await (const i of [...Array(3)]) {
       try {
         fs.copyFileSync(filePath, buildJsPath)
         console.log('[info] copy done:', buildJsPath)
         break
-      } catch(e) {
-        await awaitSleep(500)
+      } catch (e) {
+        awaitSleep(i * 300)
       }
     }
   }
@@ -137,8 +137,8 @@ const watchPageJsHandler = (regexp, jsSourceDirPath, jsBuildDirPath) => {
     if (filePath && regexp.test(filePath)) {
       handle(filePath)
     } else if (dirPath) {
-      for(const dirEntry of fs.readdirSync(dirPath, { withFileTypes: true })) {
-        if(!dirEntry.isDirectory() && regexp.test(dirEntry.name)) {
+      for (const dirEntry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+        if (!dirEntry.isDirectory() && regexp.test(dirEntry.name)) {
           handle(dirPath + dirEntry.name)
         }
       }
@@ -150,7 +150,7 @@ const watchPageJsHandler = (regexp, jsSourceDirPath, jsBuildDirPath) => {
 /* ejs */
 const buildAllEjs = async (ejsSourceDirPath, action) => {
   const promiseList = []
-  for(const dirEntry of fs.readdirSync(ejsSourceDirPath, { withFileTypes: true })) {
+  for (const dirEntry of fs.readdirSync(ejsSourceDirPath, { withFileTypes: true })) {
     promiseList.push(action(ejsSourceDirPath + dirEntry.name))
   }
   await Promise.all(promiseList)
@@ -160,30 +160,29 @@ const compilePageEjsHandler = (ejsConfig, ejsBuildDirPath, isMinifyMode) => {
   return async (filePath) => {
     console.log('[info] page ejs updated:', filePath)
     const ejsConfigKey = path.basename(filePath).replace(/\.ejs$/, '')
-    const ejsPageConfig = Object.assign({}, ejsConfig[ejsConfigKey])
-    if(!ejsPageConfig) {
-      throw new Error('[error] ejs config undefined: ' + ejsConfigKey)
-      return
+    const ejsPageConfig = { ...ejsConfig[ejsConfigKey] }
+    if (!ejsPageConfig) {
+      throw new Error(`[error] ejs config undefined: ${ejsConfigKey}`)
     }
     Object.assign(ejsPageConfig, ejsConfig._common)
-    Object.assign(ejsPageConfig, { isProduction: true, })
-    if(ejsPageConfig.inlineScriptList) {
-      for(const [i, inlineJsPath] of Object.entries(ejsPageConfig.inlineScriptList)) {
+    Object.assign(ejsPageConfig, { isProduction: true })
+    if (ejsPageConfig.inlineScriptList) {
+      for (const [i, inlineJsPath] of Object.entries(ejsPageConfig.inlineScriptList)) {
         const scriptFilePath = ejsBuildDirPath + inlineJsPath
         try {
-          ejsPageConfig.inlineScriptList[i] = await fs.readFileSync(scriptFilePath, 'utf-8')
-        } catch(e) {
-          throw new Error('[error] script file not exists: ' + scriptFilePath)
+          ejsPageConfig.inlineScriptList[i] = fs.readFileSync(scriptFilePath, 'utf-8')
+        } catch (e) {
+          throw new Error(`[error] script file not exists: ${scriptFilePath}`)
         }
       }
     }
-    if(ejsPageConfig.inlineCssList) {
-      for(const [i, inlineCssPath] of Object.entries(ejsPageConfig.inlineCssList)) {
+    if (ejsPageConfig.inlineCssList) {
+      for (const [i, inlineCssPath] of Object.entries(ejsPageConfig.inlineCssList)) {
         const cssFilePath = ejsBuildDirPath + inlineCssPath
         try {
-          ejsPageConfig.inlineCssList[i] = await fs.readFileSync(cssFilePath, 'utf-8')
-        } catch(e) {
-          throw new Error('[error] css file not exists: ' + cssFilePath)
+          ejsPageConfig.inlineCssList[i] = fs.readFileSync(cssFilePath, 'utf-8')
+        } catch (e) {
+          throw new Error(`[error] css file not exists: ${cssFilePath}`)
         }
       }
     }
@@ -192,7 +191,7 @@ const compilePageEjsHandler = (ejsConfig, ejsBuildDirPath, isMinifyMode) => {
     const buildHtmlPath = ejsBuildDirPath + path.basename(filePath).replace(/\.ejs$/, '.html')
     fs.writeFileSync(buildHtmlPath, htmlContent)
 
-    if(isMinifyMode) {
+    if (isMinifyMode) {
       const htmlMinified = htmlMinifier.minify(fs.readFileSync(buildHtmlPath, 'utf-8'), {
         collapseWhitespace: true,
         removeComments: true,
@@ -216,7 +215,7 @@ const compilePageEjsHandler = (ejsConfig, ejsBuildDirPath, isMinifyMode) => {
         max_preserve_newlines: 0,
         wrap_line_length: 0,
         wrap_attributes_indent_size: 0,
-        unformatted: 'style,script,pre'
+        unformatted: 'style,script,pre',
       })
       fs.writeFileSync(buildHtmlPath, htmlBeautified)
       /*
@@ -230,22 +229,21 @@ const watchPageEjsHandler = (regexp, ejsConfig, ejsBuildDirPath) => {
   const handle = async (filePath) => {
     console.log('[info] page ejs updated:', filePath)
     const ejsConfigKey = path.basename(filePath).replace(/\.ejs$/, '')
-    const ejsPageConfig = Object.assign({}, ejsConfig[ejsConfigKey])
-    if(!ejsPageConfig) {
-      throw new Error('[error] ejs config undefined: ' + ejsConfigKey)
-      return
+    const ejsPageConfig = { ...ejsConfig[ejsConfigKey] }
+    if (!ejsPageConfig) {
+      throw new Error(`[error] ejs config undefined: ${ejsConfigKey}`)
     }
     Object.assign(ejsPageConfig, ejsConfig._common)
-    Object.assign(ejsPageConfig, { isProduction: false, })
-    for (let i = 0; i < 3; i++) {
+    Object.assign(ejsPageConfig, { isProduction: false })
+    for await (const i of [...Array(3)]) {
       try {
         const htmlContent = await ejs.render(fs.readFileSync(filePath, 'utf-8'), ejsPageConfig)
         const buildHtmlPath = ejsBuildDirPath + path.basename(filePath).replace(/\.ejs$/, '.html')
         fs.writeFileSync(buildHtmlPath, htmlContent)
         console.log('[info] render done:', buildHtmlPath)
         break
-      } catch(e) {
-        await awaitSleep(300)
+      } catch (e) {
+        awaitSleep(i * 300)
       }
     }
   }
@@ -254,8 +252,8 @@ const watchPageEjsHandler = (regexp, ejsConfig, ejsBuildDirPath) => {
     if (filePath && regexp.test(filePath)) {
       handle(filePath)
     } else {
-      for(const dirEntry of fs.readdirSync(dirPath, { withFileTypes: true })) {
-        if(!dirEntry.isDirectory()) {
+      for (const dirEntry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+        if (!dirEntry.isDirectory()) {
           handle(dirPath + dirEntry.name)
         }
       }
@@ -266,14 +264,14 @@ const watchPageEjsHandler = (regexp, ejsConfig, ejsBuildDirPath) => {
 const watchComponentEjsHandler = (ejsSourceDirPath, ejsConfig, ejsBuildDirPath) => {
   return async () => {
     await awaitSleep(1000)
-    buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath)) 
+    buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath))
   }
 }
 
 /* css */
 const buildAllCss = async (cssSourceDirPath, action) => {
   const promiseList = []
-  for(const dirEntry of fs.readdirSync(cssSourceDirPath, { withFileTypes: true })) {
+  for (const dirEntry of fs.readdirSync(cssSourceDirPath, { withFileTypes: true })) {
     promiseList.push(action(cssSourceDirPath + dirEntry.name))
   }
   await Promise.all(promiseList)
@@ -282,16 +280,16 @@ const buildAllCss = async (cssSourceDirPath, action) => {
 const compilePageCssHandler = (cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath) => {
   return async (filePath) => {
     const buildCssPath = cssBuildDirPath + path.basename(filePath)
-    if(filePath.indexOf(tailwindcssFilePath) === (filePath.length - tailwindcssFilePath.length)) {
+    if (filePath.indexOf(tailwindcssFilePath) === (filePath.length - tailwindcssFilePath.length)) {
       console.log('[info] new tailwindcss filePath:', buildCssPath)
-      const p = await fork(['NODE_ENV=production', 'tailwindcss', 'build', '-c', tailwindcssConfigPath, '-i', filePath, '-o', buildCssPath])
+      await fork(['NODE_ENV=production', 'tailwindcss', 'build', '-c', tailwindcssConfigPath, '-i', filePath, '-o', buildCssPath])
     } else {
       console.log('[info] new css filePath:', buildCssPath)
       fs.mkdirSync(path.dirname(buildCssPath), { recursive: true })
       fs.copyFileSync(filePath, buildCssPath)
     }
 
-    const cssMinified = new cleancss().minify(fs.readFileSync(buildCssPath))
+    const cssMinified = new Cleancss().minify(fs.readFileSync(buildCssPath))
     fs.writeFileSync(buildCssPath, cssMinified.styles)
     /*
   const cssMinified = []
@@ -304,16 +302,16 @@ const compilePageCssHandler = (cssBuildDirPath, tailwindcssConfigPath, tailwindc
 const watchPageCssHandler = (regexp, cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath) => {
   const handle = async (filePath) => {
     const buildCssPath = cssBuildDirPath + path.basename(filePath)
-    if(filePath.indexOf(tailwindcssFilePath) === (filePath.length - tailwindcssFilePath.length)) {
+    if (filePath.indexOf(tailwindcssFilePath) === (filePath.length - tailwindcssFilePath.length)) {
       console.log('[info] new tailwindcss filePath:', buildCssPath)
-      const p = await fork(['NODE_ENV=dev', 'tailwindcss', 'build', '-c', tailwindcssConfigPath, '-i', filePath, '-o', buildCssPath])
+      await fork(['NODE_ENV=dev', 'tailwindcss', 'build', '-c', tailwindcssConfigPath, '-i', filePath, '-o', buildCssPath])
     } else {
       console.log('[info] new css filePath:', buildCssPath)
       fs.mkdirSync(path.dirname(buildCssPath), { recursive: true })
       fs.copyFileSync(filePath, buildCssPath)
     }
 
-    const cssMinified = new cleancss().minify(fs.readFileSync(buildCssPath))
+    const cssMinified = new Cleancss().minify(fs.readFileSync(buildCssPath))
     fs.writeFileSync(buildCssPath, cssMinified.styles)
     /*
   const cssMinified = []
@@ -326,8 +324,8 @@ const watchPageCssHandler = (regexp, cssBuildDirPath, tailwindcssConfigPath, tai
     if (filePath && regexp.test(filePath)) {
       handle(filePath)
     } else {
-      for(const dirEntry of fs.readdirSync(dirPath, { withFileTypes: true })) {
-        if(!dirEntry.isDirectory()) {
+      for (const dirEntry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+        if (!dirEntry.isDirectory()) {
           handle(dirPath + dirEntry.name)
         }
       }
@@ -350,7 +348,7 @@ const startWatcher = (watchPath, action) => {
   let isLock = false
   if (fs.statSync(watchPath).isDirectory()) {
     isDirectory = true
-    fs.readdirSync(watchPath, { withFileTypes: true, })
+    fs.readdirSync(watchPath, { withFileTypes: true })
       .filter((ent) => { return ent.isDirectory() })
       .forEach((subDirEnt) => {
         startWatcher(`${watchPath}${subDirEnt.name}/`, action)
@@ -364,7 +362,7 @@ const startWatcher = (watchPath, action) => {
 
     isLock = true
     console.log({ watchPath, event, fileName })
-    let filePath = watchPath 
+    let filePath = watchPath
     if (isDirectory) {
       filePath += fileName
     }
@@ -401,22 +399,22 @@ const main = async () => {
   const argList = program.opts()
   console.log(argList)
 
-  const jsSourceDirPath = argList.js 
-  const cssSourceDirPath = argList.css 
-  const ejsSourceDirPath = argList.ejs 
-  const ejsComponentSourceDirPath = argList.ejsComponent 
-  const buildDirPath = argList.out 
-  const tailwindcssConfigPath = argList.tailwindcssConfig 
-  const tailwindcssFilePath = argList.tailwindcssFile 
+  const jsSourceDirPath = argList.js
+  const cssSourceDirPath = argList.css
+  const ejsSourceDirPath = argList.ejs
+  const ejsComponentSourceDirPath = argList.ejsComponent
+  const buildDirPath = argList.out
+  const tailwindcssConfigPath = argList.tailwindcssConfig
+  const tailwindcssFilePath = argList.tailwindcssFile
   const isMinifyMode = argList.minify
-  const command = argList.command
+  const { command } = argList
   const jsIgnoreDirPath = argList.jsIgnore.split(',').filter((row) => { return row !== '' })
-  const configFilePath = argList.ejsConfig 
+  const configFilePath = argList.ejsConfig
 
-  const jsBuildDirPath = buildDirPath + 'js/'
-  const cssBuildDirPath = buildDirPath + 'css/'
+  const jsBuildDirPath = `${buildDirPath}js/`
+  const cssBuildDirPath = `${buildDirPath}css/`
   const ejsBuildDirPath = buildDirPath
-  const ejsConfig = (await import(configFilePath)).ejsConfig
+  const { ejsConfig } = await import(configFilePath)
 
   if (command === 'compile') {
     removeBuildDir(jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath)
@@ -436,7 +434,7 @@ const main = async () => {
     startWatcher(cssSourceDirPath, watchPageCssHandler(/\.css$/, cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath))
     startWatcher(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath))
     startWatcher(ejsComponentSourceDirPath, watchComponentEjsHandler(ejsSourceDirPath, ejsConfig, ejsBuildDirPath))
-    startWatcher(__dirname + '/' + configFilePath, /\.(js|ts)$/, watchEjsConfigHandler())
+    startWatcher(`${__dirname}/${configFilePath}`, /\.(js|ts)$/, watchEjsConfigHandler())
   }
 }
 

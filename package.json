@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "gendoc": "yarn jsdoc -c doc/jsdoc/config.json",
-    "lint-server": "yarn eslint *.js core/"
+    "lint-server": "yarn eslint *.js core/",
+    "lint-tool": "yarn eslint *.js tool/src"
   },
   "type": "module",
   "dependencies": {
@@ -20,7 +21,8 @@
     "express-session": "^1.17.3",
     "html-minifier": "^4.0.0",
     "ioredis": "^5.2.2",
-    "js-beautify": "^1.14.7"
+    "js-beautify": "^1.14.7",
+    "uglify-js": "^3.17.4"
   },
   "devDependencies": {
     "eslint": "^8.22.0",
