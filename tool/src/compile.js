@@ -127,10 +127,10 @@ const watchPageJsHandler = (regexp, jsSourceDirPath, jsBuildDirPath) => {
       try {
         fs.copyFileSync(filePath, buildJsPath)
         console.log('[info] copy done:', buildJsPath)
+        break
       } catch(e) {
         await awaitSleep(500)
       }
-      break
     }
   }
   return (filePath, dirPath) => {
@@ -237,9 +237,17 @@ const watchPageEjsHandler = (regexp, ejsConfig, ejsBuildDirPath) => {
     }
     Object.assign(ejsPageConfig, ejsConfig._common)
     Object.assign(ejsPageConfig, { isProduction: false, })
-    const htmlContent = await ejs.render(fs.readFileSync(filePath, 'utf-8'), ejsPageConfig)
-    const buildHtmlPath = ejsBuildDirPath + path.basename(filePath).replace(/\.ejs$/, '.html')
-    fs.writeFileSync(buildHtmlPath, htmlContent)
+    for (let i = 0; i < 3; i++) {
+      try {
+        const htmlContent = await ejs.render(fs.readFileSync(filePath, 'utf-8'), ejsPageConfig)
+        const buildHtmlPath = ejsBuildDirPath + path.basename(filePath).replace(/\.ejs$/, '.html')
+        fs.writeFileSync(buildHtmlPath, htmlContent)
+        console.log('[info] render done:', buildHtmlPath)
+        break
+      } catch(e) {
+        await awaitSleep(300)
+      }
+    }
   }
 
   return (filePath, dirPath) => {
@@ -421,7 +429,11 @@ const main = async () => {
     startWatcher(jsSourceDirPath, watchPageJsHandler(/\.js$/, jsSourceDirPath, jsBuildDirPath))
     startWatcher(cssSourceDirPath, watchPageCssHandler(/\.css$/, cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath))
     startWatcher(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath))
-    startWatcher(ejsComponentSourceDirPath, () =>{ buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath)) })
+    const watchComponentEjsHandler = async (ejsSourceDirPath, ejsConfig, ejsBuildDirPath) => {
+      await awaitSleep(1000)
+      buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath)) 
+    }
+    startWatcher(ejsComponentSourceDirPath, watchComponentEjsHandler())
     startWatcher(__dirname + '/' + configFilePath, /\.(js|ts)$/, watchEjsConfigHandler())
   }
 }
