@@ -263,6 +263,12 @@ const watchPageEjsHandler = (regexp, ejsConfig, ejsBuildDirPath) => {
   }
 }
 
+const watchComponentEjsHandler = (ejsSourceDirPath, ejsConfig, ejsBuildDirPath) => {
+  return async () => {
+    await awaitSleep(1000)
+    buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath)) 
+  }
+}
 
 /* css */
 const buildAllCss = async (cssSourceDirPath, action) => {
@@ -429,11 +435,7 @@ const main = async () => {
     startWatcher(jsSourceDirPath, watchPageJsHandler(/\.js$/, jsSourceDirPath, jsBuildDirPath))
     startWatcher(cssSourceDirPath, watchPageCssHandler(/\.css$/, cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath))
     startWatcher(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath))
-    const watchComponentEjsHandler = async (ejsSourceDirPath, ejsConfig, ejsBuildDirPath) => {
-      await awaitSleep(1000)
-      buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath)) 
-    }
-    startWatcher(ejsComponentSourceDirPath, watchComponentEjsHandler())
+    startWatcher(ejsComponentSourceDirPath, watchComponentEjsHandler(ejsSourceDirPath, ejsConfig, ejsBuildDirPath))
     startWatcher(__dirname + '/' + configFilePath, /\.(js|ts)$/, watchEjsConfigHandler())
   }
 }
