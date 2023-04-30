@@ -407,7 +407,7 @@ const main = async () => {
   if (command === 'compile') {
     removeBuildDir(jsBuildDirPath, cssBuildDirPath, ejsBuildDirPath)
     await compileAllJs(jsSourceDirPath, jsIgnoreDirPath, compilePageJsHandler(jsBuildDirPath, isMinifyMode))
-    await buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(ejsConfig, ejsBuildDirPath))
+    await buildAllEjs(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath))
     await buildAllCss(cssSourceDirPath, compilePageCssHandler(cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath))
     await buildAllEjs(ejsSourceDirPath, compilePageEjsHandler(ejsConfig, ejsBuildDirPath, isMinifyMode))
   }
