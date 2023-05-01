@@ -14,40 +14,44 @@ const _closeModal = () => {
   })
 }
 
-export const showModal = (modalElm, cancelButtonIsVisible = false, onConfirm = () => {}) => {
-  if (modalElm.id === 'modalTemplate') {
-    modalElm.id = ''
-  }
-  document.body.appendChild(modalElm)
-  _closeModal()
-
-  setTimeout(() => {
-    applyElmList('[data-id="modalClose"], [data-id="modalCancelButton"]', (elm) => {
-      elm.onclick = _closeModal
-    }, document)
-
-    if (cancelButtonIsVisible) {
-      modalElm.querySelector('[data-id="modalCancelButton"]').classList.remove('hidden')
-    } else {
-      modalElm.querySelector('[data-id="modalCancelButton"]').classList.add('hidden')
+export const showModal = (modalElm, cancelButtonIsVisible = false) => {
+  return new Promise((resolve) => {
+    if (modalElm.id === 'modalTemplate') {
+      modalElm.id = ''
     }
-    modalElm.querySelector('[data-id="modalConfirmButton"]').onclick = () => {
-      if (typeof onConfirm === 'function') {
-        onConfirm()
+    document.body.appendChild(modalElm)
+    closeModal()
+
+    setTimeout(() => {
+      applyElmList('[data-id="modalClose"], [data-id="modalCancelButton"]', (elm) => {
+        elm.onclick = () => {
+          closeModal()
+          return resolve(false)
+        }
+      }, document)
+
+      if (cancelButtonIsVisible) {
+        modalElm.querySelector('[data-id="modalCancelButton"]').classList.remove('hidden')
+      } else {
+        modalElm.querySelector('[data-id="modalCancelButton"]').classList.add('hidden')
       }
-      _closeModal()
-    }
-    modalElm.classList.remove('hidden')
-    document.querySelector('#modalBackground').classList.remove('hidden')
-    modalElm.querySelector('[data-id="modalContent"]').scrollTop = 0
-    modalElm.querySelector('[data-id="modalCard"]').onclick = (e) => {
-      e.stopPropagation()
-    }
-    modalElm.onclick = (e) => {
-      e.stopPropagation()
-      _closeModal()
-    }
-  }, 100)
+      modalElm.querySelector('[data-id="modalConfirmButton"]').onclick = () => {
+        closeModal()
+        return resolve(true)
+      }
+      modalElm.classList.remove('hidden')
+      document.querySelector('#modalBackground').classList.remove('hidden')
+      modalElm.querySelector('[data-id="modalContent"]').scrollTop = 0
+      modalElm.querySelector('[data-id="modalCard"]').onclick = (e) => {
+        e.stopPropagation()
+      }
+      modalElm.onclick = (e) => {
+        e.stopPropagation()
+        closeModal()
+        return resolve(false)
+      }
+    }, 100)
+  })
 }
 
 export const getErrorModalElmAndSetter = () => {
