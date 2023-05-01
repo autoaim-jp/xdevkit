@@ -54,18 +54,25 @@ export const getErrorModalElmAndSetter = () => {
   const modalTemplateElm = document.querySelector('#modalTemplate')
   const modalElm = modalTemplateElm.cloneNode(true)
 
-  modalElm.querySelector('[data-id="modalTitle"]').innerText = 'エラー'
+  const modalTitleElm = modalElm.querySelector('[data-id="modalTitle"]')
+  modalTitleElm.innerText = 'エラー'
 
   const labelP = document.createElement('p')
   labelP.innerText = 'エラーが発生しました。'
   modalElm.querySelector('[data-id="modalContent"]').appendChild(labelP)
 
-  const setContent = (textStr, errorLabelList) => {
-    labelP.innerText = errorLabelList[textStr] || textStr
+  const setContent = (textStr, errorLabelList = null, title = 'エラー') => {
+    if (errorLabelList) {
+      labelP.innerText = errorLabelList[textStr] || textStr
+    } else {
+      labelP.innerText = textStr
+    }
+    modalTitleElm.innerText = title
   }
 
   return { modalElm, setContent }
 }
+
 
 /* tab */
 export const createTabMenuContainer = () => {
