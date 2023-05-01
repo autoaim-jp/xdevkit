@@ -434,7 +434,7 @@ const main = async () => {
     startWatcher(cssSourceDirPath, watchPageCssHandler(/\.css$/, cssBuildDirPath, tailwindcssConfigPath, tailwindcssFilePath))
     startWatcher(ejsSourceDirPath, watchPageEjsHandler(/\.ejs$/, ejsConfig, ejsBuildDirPath))
     startWatcher(ejsComponentSourceDirPath, watchComponentEjsHandler(ejsSourceDirPath, ejsConfig, ejsBuildDirPath))
-    startWatcher(`${__dirname}/${configFilePath}`, /\.(js|ts)$/, watchEjsConfigHandler())
+    startWatcher(`${__dirname}/${configFilePath}`, watchEjsConfigHandler())
   }
 }
 
