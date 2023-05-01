@@ -20,12 +20,12 @@ export const showModal = (modalElm, cancelButtonIsVisible = false) => {
       modalElm.id = ''
     }
     document.body.appendChild(modalElm)
-    closeModal()
+    _closeModal()
 
     setTimeout(() => {
       applyElmList('[data-id="modalClose"], [data-id="modalCancelButton"]', (elm) => {
         elm.onclick = () => {
-          closeModal()
+          _closeModal()
           return resolve(false)
         }
       }, document)
@@ -36,7 +36,7 @@ export const showModal = (modalElm, cancelButtonIsVisible = false) => {
         modalElm.querySelector('[data-id="modalCancelButton"]').classList.add('hidden')
       }
       modalElm.querySelector('[data-id="modalConfirmButton"]').onclick = () => {
-        closeModal()
+        _closeModal()
         return resolve(true)
       }
       modalElm.classList.remove('hidden')
@@ -47,7 +47,7 @@ export const showModal = (modalElm, cancelButtonIsVisible = false) => {
       }
       modalElm.onclick = (e) => {
         e.stopPropagation()
-        closeModal()
+        _closeModal()
         return resolve(false)
       }
     }, 100)
