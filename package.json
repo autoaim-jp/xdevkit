@@ -7,8 +7,9 @@
   "license": "MIT",
   "scripts": {
     "gendoc": "yarn jsdoc -c doc/jsdoc/config.json",
-    "lint-server": "yarn eslint *.js core/",
-    "lint-tool": "yarn eslint *.js tool/src"
+    "lint-server": "yarn eslint server/ --ext .js",
+    "lint-browser": "yarn eslint view/ --ext .js",
+    "lint-tool": "yarn eslint tool/src/ --ext .js"
   },
   "type": "module",
   "dependencies": {
