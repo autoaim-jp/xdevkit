@@ -3,8 +3,8 @@
  *
  * @memberof action
  */
-export const getApiRouter = (handleXloginConnect, handleXloginCode, handleUserProfile, endResponse) => {
-  const expressRouter = mod.express.Router()
+export const getApiRouter = (express, handleXloginConnect, handleXloginCode, handleUserProfile, endResponse) => {
+  const expressRouter = express.Router()
 
   expressRouter.get('/f/xlogin/connect', (req, res) => {
     const { redirectAfterAuth, requestScope } = req.query

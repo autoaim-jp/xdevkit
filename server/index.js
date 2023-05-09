@@ -37,7 +37,7 @@ const init = (setting) => {
 const getRouter = () => {
   const expressRouter = express.Router()
   expressRouter.use(core.getSessionRouter())
-  expressRouter.use(action.getApiRouter(core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile, output.endResponse))
+  expressRouter.use(action.getApiRouter(express, core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile, output.endResponse))
   return expressRouter
 }
 
