@@ -4,7 +4,6 @@
  * @file coreの機能をまとめたファイル。
  * @namespace core
  */
-import sessionRouter, { getSessionRouter } from './sessionRouter.js'
 import apiRouter from './apiRouter.js'
 
 /**
@@ -19,8 +18,7 @@ import apiRouter from './apiRouter.js'
  * @param {module} Redis
  * @param {module} RedisStore
  */
-const init = (browserServerSetting, setting, lib, express, expressSession, Redis, RedisStore) => {
-  sessionRouter.init(setting, express, expressSession, Redis, RedisStore)
+const init = (browserServerSetting, setting, lib, express) => {
   apiRouter.init(browserServerSetting, setting, lib, express)
 }
 

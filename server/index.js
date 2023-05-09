@@ -31,7 +31,7 @@ const init = (setting) => {
   xdevkitSetting = setting
 
   lib.init(crypto, axios)
-  core.init(browserServerSetting, setting, lib, express, expressSession, Redis, RedisStore)
+  core.init(browserServerSetting, setting, lib, express)
 }
 
 /**
@@ -41,7 +41,10 @@ const init = (setting) => {
  */
 const getRouter = () => {
   const expressRouter = express.Router()
-  expressRouter.use(core.getSessionRouter())
+  expressRouter.use(action.getSessionRouter(argNamed({
+    mod: { express, expressSession, Redis, RedisStore },
+    setting: xdevkitSetting.get('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
+  })))
   expressRouter.use(action.getApiRouter(argNamed({
     core: [core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile],
     mod: { express },
