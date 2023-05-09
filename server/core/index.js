@@ -24,7 +24,6 @@ const init = (browserServerSetting, setting, lib, express) => {
 
 export default {
   init,
-  getSessionRouter,
   apiRouter,
 }
 
