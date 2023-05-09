@@ -187,7 +187,7 @@ const addQueryStr = (url, queryStr) => {
  * @memberof lib
  * @param {Object} obj
  */
-const argNamed = (obj) => {
+const _argNamed = (obj) => {
   const flattened = {}
 
   Object.keys(obj).forEach((key) => {
@@ -212,6 +212,17 @@ const argNamed = (obj) => {
   return flattened
 }
 
+/**
+ * グローバルの関数をセットする。
+ */
+const monkeyPatch = () => {
+  if (typeof global.argNamed === 'undefined') {
+    global.argNamed = _argNamed
+  } else {
+    console.log('[warn] global.argNamed is already set.')
+  }
+}
+
 export default {
   init,
   objToQuery,
@@ -221,6 +232,6 @@ export default {
   getAccessTokenByCode,
   getUserInfo,
   addQueryStr,
-  argNamed,
+  monkeyPatch,
 }
 

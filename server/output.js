@@ -1,4 +1,12 @@
 /**
+ * /xdevkit/server/output.js
+ *
+ * @file 外部へのリクエストやレスポンスの関数を定義するファイル
+ * @namespace output
+ */
+
+
+/**
  * HTTPリクエストの処理を終了する。
  *
  * @memberof output
@@ -6,7 +14,7 @@
  * @param {Object} res
  * @param {Object} handleResult
  */
-const endResponse = (req, res, handleResult) => {
+const endResponse = (req, res, handleResult, ERROR_PAGE) => {
   console.log('_endResponse error:', handleResult.error)
   req.session.auth = handleResult.session
 
@@ -15,7 +23,7 @@ const endResponse = (req, res, handleResult) => {
   } if (handleResult.redirect) {
     return res.redirect(handleResult.redirect)
   }
-  return res.redirect(mod.setting.url.ERROR_PAGE)
+  return res.redirect(ERROR_PAGE)
 }
 
 

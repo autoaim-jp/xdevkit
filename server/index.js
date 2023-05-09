@@ -1,5 +1,5 @@
 /**
- * /xdevkit/index.js
+ * /xdevkit/server/index.js
  *
  * @file エントリポイントのファイル。
  * @namespace index
@@ -17,6 +17,7 @@ import browserServerSetting from './browserServerSetting.js'
 import lib from './lib.js'
 import output from './output.js'
 
+let xdevkitSetting = null
 
 /**
  * libとcoreを初期化する。
@@ -25,6 +26,10 @@ import output from './output.js'
  * @param {Object} setting
  */
 const init = (setting) => {
+  lib.monkeyPatch()
+
+  xdevkitSetting = setting
+
   lib.init(crypto, axios)
   core.init(browserServerSetting, setting, lib, express, expressSession, Redis, RedisStore)
 }
@@ -37,7 +42,12 @@ const init = (setting) => {
 const getRouter = () => {
   const expressRouter = express.Router()
   expressRouter.use(core.getSessionRouter())
-  expressRouter.use(action.getApiRouter(express, core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile, output.endResponse))
+  expressRouter.use(action.getApiRouter(argNamed({
+    core: [core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile],
+    lib: { express },
+    output: [output.endResponse],
+    setting: [xdevkitSetting.url.ERROR_PAGE],
+  })))
   return expressRouter
 }
 

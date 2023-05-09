@@ -3,6 +3,9 @@
     "es2022": true,
     "browser": true
   },
+  "globals": {
+    "argNamed": false
+  },
   "plugins": [
     "import",
     "jest"
@@ -72,6 +75,9 @@
     ],
 
     // disallow no extension
-    "import/extensions": ["error", "always", { "ignorePackages": true }]
+    "import/extensions": ["error", "always", { "ignorePackages": true }],
+
+    // allow param reassign
+    "no-param-reassign": [2, { "props": false }]
   }
 }
