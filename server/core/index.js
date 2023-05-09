@@ -5,7 +5,7 @@
  * @namespace core
  */
 import sessionRouter, { getSessionRouter } from './sessionRouter.js'
-import apiRouter, { getApiRouter } from './apiRouter.js'
+import apiRouter from './apiRouter.js'
 
 /**
  * settingとモジュールを受け取りcoreのルーターを初期化する。
@@ -27,6 +27,6 @@ const init = (browserServerSetting, setting, lib, express, expressSession, Redis
 export default {
   init,
   getSessionRouter,
-  getApiRouter,
+  apiRouter,
 }
 
