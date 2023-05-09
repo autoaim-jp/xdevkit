@@ -11,9 +11,12 @@ import expressSession from 'express-session'
 import Redis from 'ioredis'
 import RedisStore from 'connect-redis'
 
+import action from './action.js'
 import core from './core/index.js'
 import browserServerSetting from './browserServerSetting.js'
 import lib from './lib.js'
+import output from './output.js'
+
 
 /**
  * libとcoreを初期化する。
@@ -34,7 +37,7 @@ const init = (setting) => {
 const getRouter = () => {
   const expressRouter = express.Router()
   expressRouter.use(core.getSessionRouter())
-  expressRouter.use(core.getApiRouter())
+  expressRouter.use(action.getApiRouter(core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile, output.endResponse))
   return expressRouter
 }
 

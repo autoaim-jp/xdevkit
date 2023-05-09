@@ -9,7 +9,8 @@
     "gendoc": "yarn jsdoc -c doc/jsdoc/config.json",
     "lint-server": "yarn eslint server/ --ext .js",
     "lint-browser": "yarn eslint view/ --ext .js",
-    "lint-tool": "yarn eslint tool/src/ --ext .js"
+    "lint-tool": "yarn eslint tool/src/ --ext .js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules yarn jest test/"
   },
   "type": "module",
   "dependencies": {
@@ -22,6 +23,7 @@
     "express-session": "^1.17.3",
     "html-minifier": "^4.0.0",
     "ioredis": "^5.2.2",
+    "jest": "^29.5.0",
     "js-beautify": "^1.14.7",
     "uglify-js": "^3.17.4"
   },

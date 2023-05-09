@@ -57,7 +57,7 @@ const _getErrorResponse = (status, error, isServerRedirect, response = null, ses
  * @memberof core
  * @param {String} redirectAfterAuth
  */
-const _handleXloginConnect = (redirectAfterAuth, requestScope) => {
+const handleXloginConnect = (redirectAfterAuth, requestScope) => {
   const oidcSessionPart = {}
   oidcSessionPart.iss = mod.setting.env.AUTH_SERVER_ORIGIN
   oidcSessionPart.codeVerifier = mod.lib.getRandomB64UrlSafe(mod.setting.api.CODE_VERIFIER_L)
@@ -96,7 +96,7 @@ const _handleXloginConnect = (redirectAfterAuth, requestScope) => {
  * @param {String} iss
  * @param {Object} userSession
  */
-const _handleXloginCode = async (state, code, iss, userSession) => {
+const handleXloginCode = async (state, code, iss, userSession) => {
   if (!userSession || !userSession.oidc) {
     const status = mod.bsc.statusList.INVALID_SESSION
     const error = 'handle_xlogin_code_session'
@@ -163,7 +163,7 @@ const _handleXloginCode = async (state, code, iss, userSession) => {
  * @memberof core
  * @param {Object} authSession
  */
-const _handleUserProfile = (authSession) => {
+const handleUserProfile = (authSession) => {
   if (!authSession || !authSession.userInfo) {
     const status = mod.bsc.statusList.INVALID_SESSION
     const error = 'handle_user_profile_session'
@@ -175,56 +175,11 @@ const _handleUserProfile = (authSession) => {
   return { status, session: authSession, response: { userInfo } }
 }
 
-/**
- * HTTPリクエストの処理を終了する。
- *
- * @memberof core
- * @param {Object} req
- * @param {Object} res
- * @param {Object} handleResult
- */
-const _endResponse = (req, res, handleResult) => {
-  console.log('_endResponse error:', handleResult.error)
-  req.session.auth = handleResult.session
-
-  if (handleResult.response) {
-    return res.json(handleResult.response)
-  } if (handleResult.redirect) {
-    return res.redirect(handleResult.redirect)
-  }
-  return res.redirect(mod.setting.url.ERROR_PAGE)
-}
-
-/**
- * 処理するリクエストのパスとハンドラをセットしたルーターを作成する。
- *
- * @memberof core
- */
-export const getApiRouter = () => {
-  const expressRouter = mod.express.Router()
-
-  expressRouter.get('/f/xlogin/connect', (req, res) => {
-    const { redirectAfterAuth, requestScope } = req.query
-    const resultHandleXloginConnect = _handleXloginConnect(redirectAfterAuth, requestScope)
-    _endResponse(req, res, resultHandleXloginConnect)
-  })
-
-  expressRouter.get('/f/xlogin/callback', async (req, res) => {
-    const { state, code, iss } = req.query
-    const resultHandleXloginCode = await _handleXloginCode(state, code, iss, req.session.auth)
-    _endResponse(req, res, resultHandleXloginCode)
-  })
-
-  expressRouter.get('/f/user/profile', (req, res) => {
-    const resultHandleUserProfile = _handleUserProfile(req.session.auth)
-    _endResponse(req, res, resultHandleUserProfile)
-  })
-
-  return expressRouter
-}
-
 
 export default {
   init,
+  handleXloginConnect,
+  handleXloginCode,
+  handleUserProfile,
 }
 
