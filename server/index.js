@@ -46,7 +46,7 @@ const getRouter = () => {
     core: [core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile],
     lib: { express },
     output: [output.endResponse],
-    setting: [xdevkitSetting.url.ERROR_PAGE],
+    setting: xdevkitSetting.get('url.ERROR_PAGE'),
   })))
   return expressRouter
 }
