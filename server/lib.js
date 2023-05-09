@@ -181,6 +181,37 @@ const addQueryStr = (url, queryStr) => {
   return `${url}?${queryStr}`
 }
 
+/**
+ * 引数に名前をつける。
+ *
+ * @memberof lib
+ * @param {Object} obj
+ */
+const argNamed = (obj) => {
+  const flattened = {}
+
+  Object.keys(obj).forEach((key) => {
+    if (Array.isArray(obj[key])) {
+      Object.assign(flattened, obj[key].reduce((prev, curr) => {
+        if (typeof curr === 'undefined') {
+          throw new Error(`[error] flat argument by list can only contain function but: ${typeof curr} @${key}\n===== maybe you need make func exported like  module.exports = { func, } =====`)
+        } else if (typeof curr === 'function') {
+          prev[curr.name] = curr
+        } else {
+          throw new Error(`[error] flat argument by list can only contain function but: ${typeof curr} @${key}`)
+        }
+        return prev
+      }, {}))
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+      Object.assign(flattened, obj[key])
+    } else {
+      flattened[key] = obj[key]
+    }
+  })
+
+  return flattened
+}
+
 export default {
   init,
   objToQuery,
@@ -190,5 +221,6 @@ export default {
   getAccessTokenByCode,
   getUserInfo,
   addQueryStr,
+  argNamed,
 }
 
