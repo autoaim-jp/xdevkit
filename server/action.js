@@ -10,7 +10,7 @@
  *
  * @memberof action
  */
-const getApiRouter = (express, handleXloginConnect, handleXloginCode, handleUserProfile, endResponse, ERROR_PAGE) => {
+const getApiRouter = ({ express, handleXloginConnect, handleXloginCode, handleUserProfile, endResponse, ERROR_PAGE }) => {
   const expressRouter = express.Router()
 
   expressRouter.get('/f/xlogin/connect', (req, res) => {

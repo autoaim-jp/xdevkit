@@ -44,7 +44,7 @@ const getRouter = () => {
   expressRouter.use(core.getSessionRouter())
   expressRouter.use(action.getApiRouter(argNamed({
     core: [core.apiRouter.handleXloginConnect, core.apiRouter.handleXloginCode, core.apiRouter.handleUserProfile],
-    lib: { express },
+    mod: { express },
     output: [output.endResponse],
     setting: xdevkitSetting.get('url.ERROR_PAGE'),
   })))
