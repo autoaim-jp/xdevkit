@@ -30,7 +30,7 @@ const init = ({ setting, lib, express }) => {
  * @param {Object} response
  * @param {Object} session
  */
-const _getErrorResponse = (status, error, isServerRedirect, response = null, session = {}) => {
+const _getErrorResponse = ({ status, error, isServerRedirect, response = null, session = {} }) => {
   const redirect = `${mod.setting.xdevkitSetting.getValue('url.ERROR_PAGE')}?error=${encodeURIComponent(error)}`
   if (isServerRedirect) {
     return {
@@ -56,7 +56,7 @@ const _getErrorResponse = (status, error, isServerRedirect, response = null, ses
  * @memberof core
  * @param {String} redirectAfterAuth
  */
-const handleXloginConnect = (redirectAfterAuth, requestScope) => {
+const handleXloginConnect = ({ redirectAfterAuth, requestScope }) => {
   const oidcSessionPart = {}
   oidcSessionPart.iss = mod.setting.xdevkitSetting.getValue('env.AUTH_SERVER_ORIGIN')
   oidcSessionPart.codeVerifier = mod.lib.getRandomB64UrlSafe(mod.setting.xdevkitSetting.getValue('api.CODE_VERIFIER_L'))
@@ -95,23 +95,23 @@ const handleXloginConnect = (redirectAfterAuth, requestScope) => {
  * @param {String} iss
  * @param {Object} userSession
  */
-const handleXloginCallback = async (state, code, iss, userSession) => {
+const handleXloginCallback = async ({ state, code, iss, userSession }) => {
   if (!userSession || !userSession.oidc) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
     const error = 'handle_xlogin_code_session'
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   if (state !== userSession.oidc.state) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
     const error = 'handle_xlogin_code_state'
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   if (iss !== userSession.oidc.iss) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_OIDC_ISSUER')
     const error = 'handle_xlogin_code_iss'
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   /* request accessToken */
@@ -119,7 +119,7 @@ const handleXloginCallback = async (state, code, iss, userSession) => {
   if (!accessTokenResponse) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
     const error = 'handle_xlogin_code_access_token'
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   const accessToken = accessTokenResponse?.data?.result?.accessToken
@@ -127,7 +127,7 @@ const handleXloginCallback = async (state, code, iss, userSession) => {
   if (accessTokenResponse.error || !accessToken || !splitPermissionList) {
     const status = mod.setting.browserServerSetting.getValue('statusList.API_ERROR')
     const error = encodeURIComponent(accessTokenResponse.error)
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   /* request userInfo */
@@ -136,14 +136,14 @@ const handleXloginCallback = async (state, code, iss, userSession) => {
   if (!userInfoResponse) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
     const error = 'handle_xlogin_code_user_info'
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   const userInfo = userInfoResponse?.data?.result?.userInfo
   if (userInfoResponse.error || !userInfo) {
     const status = mod.setting.browserServerSetting.getValue('statusList.API_ERROR')
     const error = encodeURIComponent(userInfoResponse.error)
-    return _getErrorResponse(status, error, true)
+    return _getErrorResponse({ status, error, isServerRedirect: true })
   }
 
   const status = mod.setting.browserServerSetting.getValue('statusList.LOGIN_SUCCESS')
@@ -160,18 +160,18 @@ const handleXloginCallback = async (state, code, iss, userSession) => {
  * セッションからユーザー情報を返す。
  *
  * @memberof core
- * @param {Object} authSession
+ * @param {Object} userSession
  */
-const handleUserProfile = (authSession) => {
-  if (!authSession || !authSession.userInfo) {
+const handleUserProfile = ({ userSession }) => {
+  if (!userSession || !userSession.userInfo) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
     const error = 'handle_user_profile_session'
-    return _getErrorResponse(status, error, false)
+    return _getErrorResponse({ status, error, isServerRedirect: false })
   }
 
-  const { userInfo } = authSession
+  const { userInfo } = userSession
   const status = mod.setting.browserServerSetting.getValue('statusList.OK')
-  return { status, session: authSession, response: { userInfo } }
+  return { status, session: userSession, response: { userInfo } }
 }
 
 

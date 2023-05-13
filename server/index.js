@@ -55,7 +55,39 @@ const _getApiRouter = () => {
 }
 
 /**
- * coreのルーターを統合したルーターを返す。
+ * セッションを管理するルーターを作成する。
+ *
+ * @memberof index
+ */
+const getSessionRouter = () => {
+  const expressRouter = express.Router()
+  const redis = new Redis({
+    port: a.setting.xdevkitSetting.getValue('REDIS_PORT'),
+    host: a.setting.xdevkitSetting.getValue('REDIS_HOST'),
+    db: a.setting.xdevkitSetting.getValue('REDIS_DB'),
+  })
+  expressRouter.use(expressSession({
+    secret: process.env.a.setting.xdevkitSetting.getValue('SESSION_SECRET'),
+    resave: true,
+    saveUninitialized: true,
+    rolling: true,
+    name: a.setting.xdevkitSetting.getValue('SESSION_ID'),
+    cookie: {
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      secure: a.setting.xdevkitSetting.getValue('SESSION_COOKIE_SECURE'),
+      httpOnly: true,
+      sameSite: 'lax',
+    },
+    store: new (RedisStore(expressSession))({ client: redis }),
+  }))
+
+  return expressRouter
+}
+
+
+/**
+ * xdevkitのルータを返す。
  *
  * @memberof index
  */
@@ -73,12 +105,7 @@ const getRouter = ({ xdevkitSetting }) => {
   }))
 
   const expressRouter = express.Router()
-  expressRouter.use(a.action.getSessionRouter(argNamed({
-    mod: {
-      express, expressSession, Redis, RedisStore,
-    },
-    setting: a.setting.xdevkitSetting.getList('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
-  })))
+  expressRouter.use(_getSessionRouter())
   expressRouter.use(_getApiRouter())
   return expressRouter
 }
