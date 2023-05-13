@@ -14,7 +14,9 @@
  * @param {Object} res
  * @param {Object} handleResult
  */
-const endResponse = ({ req, res, handleResult, ERROR_PAGE }) => {
+const endResponse = ({
+  req, res, handleResult, ERROR_PAGE,
+}) => {
   console.log('_endResponse error:', handleResult.error)
   req.session.auth = handleResult.session
 

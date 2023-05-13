@@ -24,7 +24,7 @@ const init = ({ crypto, axios }) => {
  * @memberof lib
  * @param {Object} obj
  */
-const objToQuery = (obj) => {
+const objToQuery = ({ obj }) => {
   return Object.entries(obj).map(([key, value]) => { return `${key}=${value}` }).join('&')
 }
 
@@ -39,7 +39,9 @@ const objToQuery = (obj) => {
  * @param {Object} header
  * @param {Boolean} json
  */
-const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) => {
+const apiRequest = ({
+  isPost, origin, path, param = {}, header = {}, json = true,
+}) => {
   const calcSha256AsB64 = (str) => {
     const sha256 = mod.crypto.createHash('sha256')
     sha256.update(str)
@@ -52,7 +54,7 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
   }
 
   return new Promise((resolve) => {
-    const query = param && objToQuery(param)
+    const query = param && objToQuery({ obj: param })
     const queryString = query ? `?${query}` : ''
     const pathWithQueryString = `${path}${isPost ? '' : queryString}`
     const contentHash = calcSha256AsB64(JSON.stringify(isPost ? param : {}))
@@ -94,7 +96,7 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
  * @memberof lib
  * @param {Integer} len
  */
-const getRandomB64UrlSafe = (len) => {
+const getRandomB64UrlSafe = ({ len }) => {
   return mod.crypto.randomBytes(len).toString('base64url').slice(0, len)
 }
 
@@ -105,7 +107,7 @@ const getRandomB64UrlSafe = (len) => {
  * @param {String} codeVerifier
  * @param {String} codeChallengeMethod
  */
-const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
+const convertToCodeChallenge = ({ codeVerifier, codeChallengeMethod }) => {
   const calcSha256AsB64Url = (str) => {
     const sha256 = mod.crypto.createHash('sha256')
     sha256.update(str)
@@ -124,9 +126,12 @@ const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
  * @memberof lib
  * @param {String} code
  * @param {Object} oidcSessionPart
- * @param {String} endpoint
+ * @param {String} API_SERVER_ORIGIN
+ * @param {String} XLOGIN_CODE_ENDPOINT 
  */
-const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
+const getAccessTokenByCode = ({
+  code, oidcSessionPart, API_SERVER_ORIGIN, XLOGIN_CODE_ENDPOINT,
+}) => {
   if (!code || !oidcSessionPart.clientId || !oidcSessionPart.state || !oidcSessionPart.codeVerifier) {
     return null
   }
@@ -139,32 +144,39 @@ const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
     'x-xlogin-client-id': clientId,
   }
 
-  return apiRequest(false, origin, path, param, header, true)
+  return apiRequest({
+    isPost: false, origin: API_SERVER_ORIGIN, path: XLOGIN_CODE_ENDPOINT, param, header, json: true,
+  })
 }
 
 /**
  * OIDCの処理で、accessTokenを使ってユーザー情報を問い合わせる。
  *
  * @memberof lib
- * @param {String} clientId
  * @param {Array} filterKeyList
  * @param {String} accessToken
- * @param {String} endpoint
+ * @param {String} CLIENT_ID
+ * @param {String} API_SERVER_ORIGIN
+ * @param {String} XLOGIN_USER_INFO_ENDPOINT
  */
-const getUserInfo = (clientId, filterKeyList, accessToken, origin, path) => {
+const getUserInfo = ({
+  filterKeyList, accessToken, CLIENT_ID, API_SERVER_ORIGIN, XLOGIN_USER_INFO_ENDPOINT,
+}) => {
   if (!accessToken) {
     return null
   }
 
   const header = {
     authorization: `Bearer ${accessToken}`,
-    'x-xlogin-client-id': clientId,
+    'x-xlogin-client-id': CLIENT_ID,
   }
   const filterKeyListStr = filterKeyList.join(',')
   const param = {
     filterKeyListStr,
   }
-  return apiRequest(false, origin, path, param, header, true)
+  return apiRequest({
+    isPost: false, origin: API_SERVER_ORIGIN, path: XLOGIN_USER_INFO_ENDPOINT, param, header, json: true,
+  })
 }
 
 /**
@@ -174,7 +186,7 @@ const getUserInfo = (clientId, filterKeyList, accessToken, origin, path) => {
  * @param {String} url
  * @param {String} queryStr
  */
-const addQueryStr = (url, queryStr) => {
+const addQueryStr = ({ url, queryStr }) => {
   if (url.indexOf('?') >= 0) {
     return `${url}&${queryStr}`
   }
