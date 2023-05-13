@@ -8,7 +8,7 @@
 const getHandlerConnect = ({ handleXloginConnect, endResponse, ERROR_PAGE }) => {
   return (req, res) => {
     const { redirectAfterAuth, requestScope } = req.query
-    const { resultHandleXloginConnect: handleResult } = handleXloginConnect({ redirectAfterAuth, requestScope })
+    const handleResult = handleXloginConnect({ redirectAfterAuth, requestScope })
     endResponse({ req, res, handleResult, ERROR_PAGE })
   }
 }
@@ -17,7 +17,7 @@ const getHandlerCallback = ({ handleXloginCallback, endResponse, ERROR_PAGE }) =
   return async (req, res) => {
     const { state, code, iss } = req.query
     const { auth: userSession } = req.session
-    const { resultHandleXloginCallback: handleResult } = await handleXloginCallback({ state, code, iss, userSession })
+    const handleResult = await handleXloginCallback({ state, code, iss, userSession })
     endResponse({ req, res, handleResult, ERROR_PAGE })
   }
 }
@@ -25,7 +25,7 @@ const getHandlerCallback = ({ handleXloginCallback, endResponse, ERROR_PAGE }) =
 const getHandlerProfile = ({ handleUserProfile, endResponse, ERROR_PAGE }) => {
   return (req, res) => {
     const { auth: userSession } = req.session
-    const { resultHandleUserProfile: handleResult } = handleUserProfile({ userSession })
+    const handleResult = handleUserProfile({ userSession })
     endResponse({ req, res, handleResult, ERROR_PAGE })
   }
 }
