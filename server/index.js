@@ -62,9 +62,9 @@ const _getApiRouter = () => {
 const _getSessionRouter = () => {
   const expressRouter = express.Router()
   const redis = new Redis({
-    port: a.setting.xdevkitSetting.getValue('env.REDIS_PORT'),
-    host: a.setting.xdevkitSetting.getValue('env.REDIS_HOST'),
-    db: a.setting.xdevkitSetting.getValue('env.REDIS_DB'),
+    port: a.setting.xdevkitSetting.getValue('session.REDIS_PORT'),
+    host: a.setting.xdevkitSetting.getValue('session.REDIS_HOST'),
+    db: a.setting.xdevkitSetting.getValue('session.REDIS_DB'),
   })
   expressRouter.use(expressSession({
     secret: process.env.SESSION_SECRET,
