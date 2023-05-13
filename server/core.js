@@ -12,12 +12,11 @@ const mod = {}
  * @memberof core
  * @param {Object} setting
  * @param {module} lib
- * @param {module} express
  */
-const init = ({ setting, lib, express }) => {
+const init = ({ setting, input, lib }) => {
   mod.setting = setting
+  mod.input = input
   mod.lib = lib
-  mod.express = express
 }
 
 /**
@@ -121,9 +120,10 @@ const handleXloginCallback = async ({
   }
 
   /* request accessToken */
-  const accessTokenResponse = await mod.lib.getAccessTokenByCode(argNamed({
+  const accessTokenResponse = await mod.input.getAccessTokenByCode(argNamed({
     param: { code, oidcSessionPart: userSession.oidc },
     setting: mod.setting.xdevkitSetting.getList('env.API_SERVER_ORIGIN', 'url.XLOGIN_CODE_ENDPOINT'),
+    lib: [a.lib.apiRequest],
   }))
   if (!accessTokenResponse) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
@@ -141,9 +141,10 @@ const handleXloginCallback = async ({
 
   /* request userInfo */
   const filterKeyList = mod.setting.xdevkitSetting.getValue('api.SCOPE').split(',').map((row) => { return row.split(':').slice(1).join(':') })
-  const userInfoResponse = await mod.lib.getUserInfo(argNamed({
+  const userInfoResponse = await mod.input.getUserInfo(argNamed({
     param: { filterKeyList, accessToken },
     setting: mod.setting.xdevkitSetting.getList('env.CLIENT_ID', 'env.API_SERVER_ORIGIN', 'url.XLOGIN_USER_INFO_ENDPOINT'),
+    lib: [a.lib.apiRequest],
   }))
   if (!userInfoResponse) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
