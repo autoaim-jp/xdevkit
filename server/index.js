@@ -31,18 +31,21 @@ const _getApiRouter = () => {
   const connectHandler = a.action.getHandlerConnect(argNamed({
     core: [a.core.handleXloginConnect],
     output: [a.output.endResponse],
+    setting: a.setting.xdevkitSetting.get('url.ERROR_PAGE'),
   }))
   expressRouter.get('/f/xlogin/connect', connectHandler)
 
   const callbackHandler = a.action.getHandlerCallback(argNamed({
     core: [a.core.handleXloginCallback],
     output: [a.output.endResponse],
+    setting: a.setting.xdevkitSetting.get('url.ERROR_PAGE'),
   }))
   expressRouter.get('/f/xlogin/callback', callbackHandler)
 
   const profileHandler = a.action.getHandlerProfile(argNamed({
     core: [a.core.handleUserProfile],
     output: [a.output.endResponse],
+    setting: a.setting.xdevkitSetting.get('url.ERROR_PAGE'),
   }))
   expressRouter.get('/f/user/profile', profileHandler)
 

@@ -39,7 +39,7 @@ const getSessionRouter = ({ express, Redis, expressSession, REDIS_PORT, REDIS_HO
 
 
 
-const getHandlerConnect = ({ handleXloginConnect, endResponse }) => {
+const getHandlerConnect = ({ handleXloginConnect, endResponse, ERROR_PAGE }) => {
   return (req, res) => {
     const { redirectAfterAuth, requestScope } = req.query
     const resultHandleXloginConnect = handleXloginConnect(redirectAfterAuth, requestScope)
@@ -47,7 +47,7 @@ const getHandlerConnect = ({ handleXloginConnect, endResponse }) => {
   }
 }
 
-const getHandlerCallback = ({ handleXloginCallback, endResponse }) => {
+const getHandlerCallback = ({ handleXloginCallback, endResponse, ERROR_PAGE }) => {
   return async (req, res) => {
     const { state, code, iss } = req.query
     const resultHandleXloginCallback = await handleXloginCallback(state, code, iss, req.session.auth)
@@ -55,7 +55,7 @@ const getHandlerCallback = ({ handleXloginCallback, endResponse }) => {
   }
 }
 
-const getHandlerProfile = ({ handleUserProfile, endResponse }) => {
+const getHandlerProfile = ({ handleUserProfile, endResponse, ERROR_PAGE }) => {
   return (req, res) => {
     const resultHandleUserProfile = handleUserProfile(req.session.auth)
     endResponse(req, res, resultHandleUserProfile, ERROR_PAGE)
