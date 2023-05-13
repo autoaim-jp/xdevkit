@@ -65,10 +65,13 @@ const handleXloginConnect = ({ redirectAfterAuth, requestScope }) => {
 
   const oidcQueryParam = {}
   oidcQueryParam.codeChallengeMethod = mod.setting.xdevkitSetting.getValue('api.XLOGIN_CODE_CHALLENGE_METHOD')
+
+  const { codeVerifier } = oidcSessionPart
+  const { codeChallengeMethod } = oidcQueryParam
   oidcQueryParam.codeChallenge = mod.lib.convertToCodeChallenge(argNamed({
-    param: [oidcSessionPart.codeVerifier, oidcQueryParam.codeChallengeMethod],
+    param: { codeVerifier, codeChallengeMethod },
   }))
-  oidcQueryParam.state = mod.lib.getRandomB64UrlSafe(mod.setting.xdevkitSetting.getValue('api.STATE_L'))
+  oidcQueryParam.state = mod.lib.getRandomB64UrlSafe({ len: mod.setting.xdevkitSetting.getValue('api.STATE_L') })
   oidcQueryParam.responseType = mod.setting.xdevkitSetting.getValue('api.XLOGIN_RESPONSE_TYPE')
   oidcQueryParam.scope = mod.setting.xdevkitSetting.getValue('api.SCOPE')
   oidcQueryParam.clientId = mod.setting.xdevkitSetting.getValue('env.CLIENT_ID')
@@ -123,7 +126,7 @@ const handleXloginCallback = async ({
   const accessTokenResponse = await mod.input.getAccessTokenByCode(argNamed({
     param: { code, oidcSessionPart: userSession.oidc },
     setting: mod.setting.xdevkitSetting.getList('env.API_SERVER_ORIGIN', 'url.XLOGIN_CODE_ENDPOINT'),
-    lib: [a.lib.apiRequest],
+    lib: [mod.lib.apiRequest],
   }))
   if (!accessTokenResponse) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
@@ -144,7 +147,7 @@ const handleXloginCallback = async ({
   const userInfoResponse = await mod.input.getUserInfo(argNamed({
     param: { filterKeyList, accessToken },
     setting: mod.setting.xdevkitSetting.getList('env.CLIENT_ID', 'env.API_SERVER_ORIGIN', 'url.XLOGIN_USER_INFO_ENDPOINT'),
-    lib: [a.lib.apiRequest],
+    lib: [mod.lib.apiRequest],
   }))
   if (!userInfoResponse) {
     const status = mod.setting.browserServerSetting.getValue('statusList.INVALID_SESSION')
