@@ -33,7 +33,7 @@ const init = (browserServerSetting, setting, lib, express) => {
  * @param {Object} session
  */
 const _getErrorResponse = (status, error, isServerRedirect, response = null, session = {}) => {
-  const redirect = `${mod.setting.xdevkitSetting.getValue('url.ERROR_PAGE}?error=${encodeURIComponent(error'))}`
+  const redirect = `${mod.setting.xdevkitSetting.getValue('url.ERROR_PAGE')}?error=${encodeURIComponent(error)}`
   if (isServerRedirect) {
     return {
       status, session, response, redirect, error,
