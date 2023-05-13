@@ -39,36 +39,34 @@ const getSessionRouter = ({ express, Redis, expressSession, REDIS_PORT, REDIS_HO
 
 
 
-/**
- * 処理するリクエストのパスとハンドラをセットしたルーターを作成する。
- *
- * @memberof action
- */
-const getApiRouter = ({ express, handleXloginConnect, handleXloginCode, handleUserProfile, endResponse, ERROR_PAGE }) => {
-  const expressRouter = express.Router()
-
-  expressRouter.get('/f/xlogin/connect', (req, res) => {
+const getHandlerConnect = ({ handleXloginConnect, endResponse }) => {
+  return (req, res) => {
     const { redirectAfterAuth, requestScope } = req.query
     const resultHandleXloginConnect = handleXloginConnect(redirectAfterAuth, requestScope)
     endResponse(req, res, resultHandleXloginConnect, ERROR_PAGE)
-  })
+  }
+}
 
-  expressRouter.get('/f/xlogin/callback', async (req, res) => {
+const getHandlerCallback = ({ handleXloginCallback, endResponse }) => {
+  return async (req, res) => {
     const { state, code, iss } = req.query
-    const resultHandleXloginCode = await handleXloginCode(state, code, iss, req.session.auth)
-    endResponse(req, res, resultHandleXloginCode, ERROR_PAGE)
-  })
+    const resultHandleXloginCallback = await handleXloginCallback(state, code, iss, req.session.auth)
+    endResponse(req, res, resultHandleXloginCallback, ERROR_PAGE)
+  }
+}
 
-  expressRouter.get('/f/user/profile', (req, res) => {
+const getHandlerProfile = ({ handleUserProfile, endResponse }) => {
+  return (req, res) => {
     const resultHandleUserProfile = handleUserProfile(req.session.auth)
     endResponse(req, res, resultHandleUserProfile, ERROR_PAGE)
-  })
-
-  return expressRouter
+  }
 }
 
 export default {
   getSessionRouter,
-  getApiRouter,
+
+  getHandlerConnect,
+  getHandlerCallback,
+  getHandlerProfile,
 }
 

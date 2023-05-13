@@ -13,7 +13,7 @@ const mod = {}
  * @param {module} crypto
  * @param {module} axios
  */
-const init = (crypto, axios) => {
+const init = ({ crypto, axios }) => {
   mod.crypto = crypto
   mod.axios = axios
 }

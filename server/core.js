@@ -1,7 +1,8 @@
 /**
- * /xdevkit/core/apiRouter.js
+ * /xdevkit/core.js
  *
  * @file OIDC関連のAPIエンドポイントのルーターのファイル。
+ * @namespace core
  */
 const mod = {}
 
@@ -96,7 +97,7 @@ const handleXloginConnect = (redirectAfterAuth, requestScope) => {
  * @param {String} iss
  * @param {Object} userSession
  */
-const handleXloginCode = async (state, code, iss, userSession) => {
+const handleXloginCallback = async (state, code, iss, userSession) => {
   if (!userSession || !userSession.oidc) {
     const status = mod.bsc.statusList.INVALID_SESSION
     const error = 'handle_xlogin_code_session'
@@ -179,7 +180,7 @@ const handleUserProfile = (authSession) => {
 export default {
   init,
   handleXloginConnect,
-  handleXloginCode,
+  handleXloginCallback,
   handleUserProfile,
 }
 
