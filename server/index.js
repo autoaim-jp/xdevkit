@@ -67,7 +67,7 @@ const getRouter = ({ xdevkitSetting }) => {
   const expressRouter = express.Router()
   expressRouter.use(a.action.getSessionRouter(argNamed({
     mod: { express, expressSession, Redis, RedisStore },
-    setting: a.setting.get('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
+    setting: a.setting.xdevkitSetting.get('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
   })))
   expressRouter.use(_getApiRouter())
   return expressRouter
