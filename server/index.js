@@ -65,7 +65,9 @@ const getRouter = ({ xdevkitSetting }) => {
   a.lib.init(argNamed({
     mod: { crypto, axios }
   }))
-  a.core.init(a.setting.browserServerSetting, a.setting, a.lib, express)
+  a.core.init(argNamed({
+    mod: { a.setting, a.lib, express }
+  }))
 
   const expressRouter = express.Router()
   expressRouter.use(a.action.getSessionRouter(argNamed({

@@ -84,24 +84,40 @@ const settingList = {
 }
 
 /**
- * const { key1, key2 } = browserServerSetting.get('key1', 'key2') のようにして定数を取得できる。
+ * const { key1, key2 } = browserServerSetting.getList('key1', 'key2') のようにして定数を取得できる。
  *
  * @memberof browserServerSetting
  * @param {Array} keyList
  */
-export const get = (...keyList) => {
+export const getList = (...keyList) => {
   /* eslint-disable no-param-reassign */
-  const constantList = keyList.reduce((prev, curr) => {
-    prev[curr] = settingList[curr]
+  const constantList = keyList.reduce((prev, key) => {
+    let value = setting
+    for(const keySplit of key.split('.')) {
+      value = value[keySplit]
+    }
+    prev[key.slice(key.lastIndexOf('.') + 1)] = value
     return prev
   }, {})
   for (const key of keyList) {
-    if (!constantList[key]) {
+    if (constantList[key.slice(key.lastIndexOf('.') + 1)] === undefined) {
       throw new Error(`[error] undefined setting constant: ${key}`)
     }
   }
   return constantList
 }
 
-export default settingList
+
+export const getValue = (key) => {
+  let value = setting
+  for(const keySplit of key.split('.')) {
+    value = value[keySplit]
+  }
+  return value
+}
+
+export default {
+  getList,
+  getValue,
+}
 
