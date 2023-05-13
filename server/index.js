@@ -59,23 +59,23 @@ const _getApiRouter = () => {
  *
  * @memberof index
  */
-const getSessionRouter = () => {
+const _getSessionRouter = () => {
   const expressRouter = express.Router()
   const redis = new Redis({
-    port: a.setting.xdevkitSetting.getValue('REDIS_PORT'),
-    host: a.setting.xdevkitSetting.getValue('REDIS_HOST'),
-    db: a.setting.xdevkitSetting.getValue('REDIS_DB'),
+    port: a.setting.xdevkitSetting.getValue('env.REDIS_PORT'),
+    host: a.setting.xdevkitSetting.getValue('env.REDIS_HOST'),
+    db: a.setting.xdevkitSetting.getValue('env.REDIS_DB'),
   })
   expressRouter.use(expressSession({
-    secret: process.env.a.setting.xdevkitSetting.getValue('SESSION_SECRET'),
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true,
     rolling: true,
-    name: a.setting.xdevkitSetting.getValue('SESSION_ID'),
+    name: a.setting.xdevkitSetting.getValue('session.SESSION_ID'),
     cookie: {
       path: '/',
       maxAge: 1000 * 60 * 60 * 24 * 30,
-      secure: a.setting.xdevkitSetting.getValue('SESSION_COOKIE_SECURE'),
+      secure: a.setting.xdevkitSetting.getValue('session.SESSION_COOKIE_SECURE'),
       httpOnly: true,
       sameSite: 'lax',
     },
