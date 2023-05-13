@@ -31,21 +31,21 @@ const _getApiRouter = () => {
   const connectHandler = a.action.getHandlerConnect(argNamed({
     core: [a.core.handleXloginConnect],
     output: [a.output.endResponse],
-    setting: a.setting.xdevkitSetting.get('url.ERROR_PAGE'),
+    setting: a.setting.xdevkitSetting.getList('url.ERROR_PAGE'),
   }))
   expressRouter.get('/f/xlogin/connect', connectHandler)
 
   const callbackHandler = a.action.getHandlerCallback(argNamed({
     core: [a.core.handleXloginCallback],
     output: [a.output.endResponse],
-    setting: a.setting.xdevkitSetting.get('url.ERROR_PAGE'),
+    setting: a.setting.xdevkitSetting.getList('url.ERROR_PAGE'),
   }))
   expressRouter.get('/f/xlogin/callback', callbackHandler)
 
   const profileHandler = a.action.getHandlerProfile(argNamed({
     core: [a.core.handleUserProfile],
     output: [a.output.endResponse],
-    setting: a.setting.xdevkitSetting.get('url.ERROR_PAGE'),
+    setting: a.setting.xdevkitSetting.getList('url.ERROR_PAGE'),
   }))
   expressRouter.get('/f/user/profile', profileHandler)
 
@@ -70,7 +70,7 @@ const getRouter = ({ xdevkitSetting }) => {
   const expressRouter = express.Router()
   expressRouter.use(a.action.getSessionRouter(argNamed({
     mod: { express, expressSession, Redis, RedisStore },
-    setting: a.setting.xdevkitSetting.get('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
+    setting: a.setting.xdevkitSetting.getList('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
   })))
   expressRouter.use(_getApiRouter())
   return expressRouter
