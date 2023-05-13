@@ -28,19 +28,19 @@ const a = asocial
 const _getApiRouter = () => {
   const expressRouter = express.Router()
 
-  const connectHandler = action.getHandlerConnect(argNamed({
+  const connectHandler = a.action.getHandlerConnect(argNamed({
     core: [a.core.handleXloginConnect],
     output: [a.output.endResponse],
   }))
   expressRouter.get('/f/xlogin/connect', connectHandler)
 
-  const callbackHandler = action.getHandlerCallback(argNamed({
+  const callbackHandler = a.action.getHandlerCallback(argNamed({
     core: [a.core.handleXloginCallback],
     output: [a.output.endResponse],
   }))
   expressRouter.get('/f/xlogin/callback', callbackHandler)
 
-  const profileHandler = action.getHandlerProfile(argNamed({
+  const profileHandler = a.action.getHandlerProfile(argNamed({
     core: [a.core.handleUserProfile],
     output: [a.output.endResponse],
   }))
@@ -59,22 +59,21 @@ const getRouter = ({ xdevkitSetting }) => {
 
   a.setting.xdevkitSetting = xdevkitSetting
 
-  a.lib.init(a.argNamed({
+  a.lib.init(argNamed({
     mod: { crypto, axios }
   }))
-  a.core.init(browserServerSetting, a.setting, lib, express)
+  a.core.init(a.setting.browserServerSetting, a.setting, a.lib, express)
 
   const expressRouter = express.Router()
-  expressRouter.use(action.getSessionRouter(argNamed({
+  expressRouter.use(a.action.getSessionRouter(argNamed({
     mod: { express, expressSession, Redis, RedisStore },
-    setting: setting.get('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
+    setting: a.setting.get('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
   })))
   expressRouter.use(_getApiRouter())
   return expressRouter
 }
 
 export default {
-  init,
   getRouter,
 }
 
