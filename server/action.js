@@ -11,7 +11,9 @@
  *
  * @memberof action
  */
-const getSessionRouter = ({ express, Redis, expressSession, REDIS_PORT, REDIS_HOST, REDIS_DB, SESSION_ID, SESSION_COOKIE_SECURE, RedisStore }) => {
+const getSessionRouter = ({
+  express, Redis, expressSession, REDIS_PORT, REDIS_HOST, REDIS_DB, SESSION_ID, SESSION_COOKIE_SECURE, RedisStore,
+}) => {
   const expressRouter = express.Router()
   const redis = new Redis({
     port: REDIS_PORT,
@@ -36,7 +38,6 @@ const getSessionRouter = ({ express, Redis, expressSession, REDIS_PORT, REDIS_HO
 
   return expressRouter
 }
-
 
 
 const getHandlerConnect = ({ handleXloginConnect, endResponse, ERROR_PAGE }) => {

@@ -17,7 +17,9 @@ import browserServerSetting from './browserServerSetting.js'
 import lib from './lib.js'
 import output from './output.js'
 
-const asocial = { action, core, lib, output, setting: { browserServerSetting } }
+const asocial = {
+  action, core, lib, output, setting: { browserServerSetting },
+}
 const a = asocial
 
 /**
@@ -63,15 +65,18 @@ const getRouter = ({ xdevkitSetting }) => {
   a.setting.xdevkitSetting = xdevkitSetting
 
   a.lib.init(argNamed({
-    mod: { crypto, axios }
+    mod: { crypto, axios },
   }))
   a.core.init(argNamed({
-    mod: { a.setting, a.lib, express }
+    asocial: { setting: a.setting, lib: a.lib },
+    mod: { express },
   }))
 
   const expressRouter = express.Router()
   expressRouter.use(a.action.getSessionRouter(argNamed({
-    mod: { express, expressSession, Redis, RedisStore },
+    mod: {
+      express, expressSession, Redis, RedisStore,
+    },
     setting: a.setting.xdevkitSetting.getList('session.REDIS_PORT', 'session.REDIS_HOST', 'session.REDIS_DB', 'session.SESSION_ID', 'session.SESSION_COOKIE_SECURE'),
   })))
   expressRouter.use(_getApiRouter())
