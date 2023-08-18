@@ -19,7 +19,7 @@ import action from './action.js'
 import lib from './lib.js'
 
 const asocial = {
-  setting: { browserServerSetting }, output, core, input, action, lib, 
+  setting: { browserServerSetting }, output, core, input, action, lib,
 }
 const a = asocial
 

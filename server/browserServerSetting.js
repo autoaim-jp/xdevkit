@@ -68,6 +68,8 @@ const statusList = {
   INVALID_OIDC_ISSUER: 1101,
 
   NOT_FOUND: 1200,
+
+  SERVER_ERROR: 1300,
 }
 
 const userReadableDateFormat = {
