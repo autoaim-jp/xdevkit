@@ -30,10 +30,15 @@ const labelList = {
         label: 'サービス内通知',
         summary: '連携するサービス内で、通知機能を利用するための権限です。',
       },
-      file: {
+      json_v1: {
+        label: 'テキスト',
+        summary: '連携するサービスで、あなたがデータを保存できます。',
+      },
+      file_v1: {
         label: 'ファイル',
         summary: '連携するサービスで、あなたがデータを保存できます。',
       },
+
     },
   },
   scopeOperation: {
