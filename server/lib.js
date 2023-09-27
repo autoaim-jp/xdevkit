@@ -13,7 +13,7 @@ const mod = {}
  * @param {module} crypto
  * @param {module} axios
  */
-const init = (crypto, axios) => {
+const init = ({ crypto, axios }) => {
   mod.crypto = crypto
   mod.axios = axios
 }
@@ -24,7 +24,7 @@ const init = (crypto, axios) => {
  * @memberof lib
  * @param {Object} obj
  */
-const objToQuery = (obj) => {
+const objToQuery = ({ obj }) => {
   return Object.entries(obj).map(([key, value]) => { return `${key}=${value}` }).join('&')
 }
 
@@ -39,7 +39,9 @@ const objToQuery = (obj) => {
  * @param {Object} header
  * @param {Boolean} json
  */
-const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) => {
+const apiRequest = ({
+  isPost, origin, path, param = {}, header = {}, json = true,
+}) => {
   const calcSha256AsB64 = (str) => {
     const sha256 = mod.crypto.createHash('sha256')
     sha256.update(str)
@@ -52,7 +54,7 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
   }
 
   return new Promise((resolve) => {
-    const query = param && objToQuery(param)
+    const query = param && objToQuery({ obj: param })
     const queryString = query ? `?${query}` : ''
     const pathWithQueryString = `${path}${isPost ? '' : queryString}`
     const contentHash = calcSha256AsB64(JSON.stringify(isPost ? param : {}))
@@ -94,7 +96,7 @@ const apiRequest = (isPost, origin, path, param = {}, header = {}, json = true) 
  * @memberof lib
  * @param {Integer} len
  */
-const getRandomB64UrlSafe = (len) => {
+const getRandomB64UrlSafe = ({ len }) => {
   return mod.crypto.randomBytes(len).toString('base64url').slice(0, len)
 }
 
@@ -105,7 +107,7 @@ const getRandomB64UrlSafe = (len) => {
  * @param {String} codeVerifier
  * @param {String} codeChallengeMethod
  */
-const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
+const convertToCodeChallenge = ({ codeVerifier, codeChallengeMethod }) => {
   const calcSha256AsB64Url = (str) => {
     const sha256 = mod.crypto.createHash('sha256')
     sha256.update(str)
@@ -119,66 +121,59 @@ const convertToCodeChallenge = (codeVerifier, codeChallengeMethod) => {
 }
 
 /**
- * OIDCの処理で、codeを使って問い合わせてアクセストークンを取得する。
- *
- * @memberof lib
- * @param {String} code
- * @param {Object} oidcSessionPart
- * @param {String} endpoint
- */
-const getAccessTokenByCode = (code, oidcSessionPart, origin, path) => {
-  if (!code || !oidcSessionPart.clientId || !oidcSessionPart.state || !oidcSessionPart.codeVerifier) {
-    return null
-  }
-
-  const { clientId, state, codeVerifier } = oidcSessionPart
-  const param = {
-    clientId, state, code, codeVerifier,
-  }
-  const header = {
-    'x-xlogin-client-id': clientId,
-  }
-
-  return apiRequest(false, origin, path, param, header, true)
-}
-
-/**
- * OIDCの処理で、accessTokenを使ってユーザー情報を問い合わせる。
- *
- * @memberof lib
- * @param {String} clientId
- * @param {Array} filterKeyList
- * @param {String} accessToken
- * @param {String} endpoint
- */
-const getUserInfo = (clientId, filterKeyList, accessToken, origin, path) => {
-  if (!accessToken) {
-    return null
-  }
-
-  const header = {
-    authorization: `Bearer ${accessToken}`,
-    'x-xlogin-client-id': clientId,
-  }
-  const filterKeyListStr = filterKeyList.join(',')
-  const param = {
-    filterKeyListStr,
-  }
-  return apiRequest(false, origin, path, param, header, true)
-}
-
-/**
  * GETクエリを適切にurlに追加する。
  *
  * @memberof lib
  * @param {String} url
  * @param {String} queryStr
  */
-const addQueryStr = (url, queryStr) => {
+const addQueryStr = ({ url, queryStr }) => {
   if (url.indexOf('?') >= 0) {
     return `${url}&${queryStr}`
   }
   return `${url}?${queryStr}`
+}
+
+/**
+ * 引数に名前をつける。
+ *
+ * @memberof lib
+ * @param {Object} obj
+ */
+const _argNamed = (obj) => {
+  const flattened = {}
+
+  Object.keys(obj).forEach((key) => {
+    if (Array.isArray(obj[key])) {
+      Object.assign(flattened, obj[key].reduce((prev, curr) => {
+        if (typeof curr === 'undefined') {
+          throw new Error(`[error] flat argument by list can only contain function but: ${typeof curr} @${key}\n===== maybe you need make func exported like  module.exports = { func, } =====`)
+        } else if (typeof curr === 'function') {
+          prev[curr.name] = curr
+        } else {
+          throw new Error(`[error] flat argument by list can only contain function but: ${typeof curr} @${key}`)
+        }
+        return prev
+      }, {}))
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+      Object.assign(flattened, obj[key])
+    } else {
+      flattened[key] = obj[key]
+    }
+  })
+
+  return flattened
+}
+
+/**
+ * グローバルの関数をセットする。
+ */
+const monkeyPatch = () => {
+  if (typeof global.argNamed === 'undefined') {
+    global.argNamed = _argNamed
+  } else {
+    console.log('[warn] global.argNamed is already set.')
+  }
 }
 
 export default {
@@ -187,8 +182,7 @@ export default {
   apiRequest,
   getRandomB64UrlSafe,
   convertToCodeChallenge,
-  getAccessTokenByCode,
-  getUserInfo,
   addQueryStr,
+  monkeyPatch,
 }
 

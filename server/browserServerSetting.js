@@ -1,5 +1,5 @@
-export const apiEndpoint = '/f'
-export const labelList = {
+const apiEndpoint = '/f'
+const labelList = {
   scopeBody: {
     global: {
       notification: {
@@ -30,10 +30,15 @@ export const labelList = {
         label: 'サービス内通知',
         summary: '連携するサービス内で、通知機能を利用するための権限です。',
       },
-      file: {
+      json_v1: {
+        label: 'テキスト',
+        summary: '連携するサービスで、あなたがデータを保存できます。',
+      },
+      file_v1: {
         label: 'ファイル',
         summary: '連携するサービスで、あなたがデータを保存できます。',
       },
+
     },
   },
   scopeOperation: {
@@ -54,7 +59,7 @@ export const labelList = {
   },
 }
 
-export const statusList = {
+const statusList = {
   OK: 1,
   SUCCESS: 100,
   LOGIN_SUCCESS: 101,
@@ -62,46 +67,66 @@ export const statusList = {
   INVALID: 1000,
   NOT_ENOUGH_PARAM: 1001,
   INVALID_SESSION: 1002,
+  INVALID_CREDENTIAL: 1003,
 
   API_ERROR: 1100,
   INVALID_OIDC_ISSUER: 1101,
 
   NOT_FOUND: 1200,
+
+  SERVER_ERROR: 1300,
 }
 
-export const userReadableDateFormat = {
+const userReadableDateFormat = {
   full: 'YYYY/MM/DD hh:mm:ss',
   day: 'YYYY/MM/DD',
   hourMinute: 'hh:mm',
   time: 'hh:mm:ss',
 }
 
-const settingList = {
+const setting = {
   apiEndpoint,
   labelList,
   statusList,
   userReadableDateFormat,
 }
 
+
 /**
- * const { key1, key2 } = browserServerSetting.get('key1', 'key2') のようにして定数を取得できる。
+ * const { key1, key2 } = browserServerSetting.getList('key1', 'key2') のようにして定数を取得できる。
  *
  * @memberof browserServerSetting
  * @param {Array} keyList
  */
-export const get = (...keyList) => {
+const getList = (...keyList) => {
   /* eslint-disable no-param-reassign */
-  const constantList = keyList.reduce((prev, curr) => {
-    prev[curr] = settingList[curr]
+  const constantList = keyList.reduce((prev, key) => {
+    let value = setting
+    for (const keySplit of key.split('.')) {
+      value = value[keySplit]
+    }
+    prev[key.slice(key.lastIndexOf('.') + 1)] = value
     return prev
   }, {})
   for (const key of keyList) {
-    if (!constantList[key]) {
+    if (constantList[key.slice(key.lastIndexOf('.') + 1)] === undefined) {
       throw new Error(`[error] undefined setting constant: ${key}`)
     }
   }
   return constantList
 }
 
-export default settingList
+
+const getValue = (key) => {
+  let value = setting
+  for (const keySplit of key.split('.')) {
+    value = value[keySplit]
+  }
+  return value
+}
+
+export default {
+  getList,
+  getValue,
+}
 
