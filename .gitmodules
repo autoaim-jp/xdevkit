@@ -1,21 +1,27 @@
 [submodule "standalone/xdevkit-view-compiler"]
 	path = standalone/xdevkit-view-compiler
 	url = https://github.com/autoaim-jp/xdevkit-view-compiler
+	update = rebase
 [submodule "standalone/xdevkit-eslint"]
 	path = standalone/xdevkit-eslint
 	url = https://github.com/autoaim-jp/xdevkit-eslint
+	update = rebase
 [submodule "standalone/xdevkit-htpasswd"]
 	path = standalone/xdevkit-htpasswd
 	url = https://github.com/autoaim-jp/xdevkit-htpasswd
+	update = rebase
 [submodule "common/xdevkit-auth-router"]
 	path = common/xdevkit-auth-router
 	url = https://github.com/autoaim-jp/xdevkit-auth-router
+	update = rebase
 [submodule "common/xdevkit-setting"]
 	path = common/xdevkit-setting
 	url = https://github.com/autoaim-jp/xdevkit-setting
+	update = rebase
 [submodule "common/xdevkit-view-component"]
 	path = common/xdevkit-view-component
 	url = https://github.com/autoaim-jp/xdevkit-view-component
+	update = rebase
 [submodule "standalone/xdevkit-jsdoc"]
 	path = standalone/xdevkit-jsdoc
 	url = https://github.com/autoaim-jp/xdevkit-jsdoc
