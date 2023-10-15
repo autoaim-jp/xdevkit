@@ -19,3 +19,4 @@
 [submodule "standalone/xdevkit-jsdoc"]
 	path = standalone/xdevkit-jsdoc
 	url = https://github.com/autoaim-jp/xdevkit-jsdoc
+	update = rebase
