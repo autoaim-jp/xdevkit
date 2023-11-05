@@ -6,5 +6,5 @@ PHONY=default init-submodule
 default: init-submodule
 
 init-submodule:
-	git submodule update --init
+	git submodule update --init --remote
 	
