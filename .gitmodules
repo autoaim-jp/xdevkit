@@ -13,6 +13,11 @@
 	url = https://github.com/autoaim-jp/xdevkit-htpasswd
 	update = rebase
 	branch = master
+[submodule "standalone/xdevkit-jsdoc"]
+	path = standalone/xdevkit-jsdoc
+	url = https://github.com/autoaim-jp/xdevkit-jsdoc
+	update = rebase
+	branch = master
 [submodule "common/xdevkit-auth-router"]
 	path = common/xdevkit-auth-router
 	url = https://github.com/autoaim-jp/xdevkit-auth-router
@@ -28,9 +33,4 @@
 	url = https://github.com/autoaim-jp/xdevkit-view-component
 	update = rebase
 	branch = master
-[submodule "standalone/xdevkit-jsdoc"]
-	path = standalone/xdevkit-jsdoc
-	url = https://github.com/autoaim-jp/xdevkit-jsdoc
-	update = rebase
-	branch = v0.24
 
