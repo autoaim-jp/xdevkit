@@ -16,7 +16,8 @@ function update_gitmodules () {
 
     git checkout master > /dev/null 2>&1
     git pull origin master > /dev/null 2>&1
-    MERGE_RESULT=$(git merge --no-commit $NEXT_VERSION 2> /dev/null)
+    MERGE_RESULT=$(git merge --no-commit --no-ff $NEXT_VERSION 2> /dev/null)
+    git merge --abort > /dev/null 2>&1 || true
     git checkout $NEXT_VERSION > /dev/null 2>&1
     popd > /dev/null
 
@@ -31,22 +32,22 @@ function update_gitmodules () {
 }
 
 function commit () {
-  COMMIT_MESSAGE=$1
+  COMMIT_MESSAGE="$1"
 
   git add .
   git commit -a -m "$COMMIT_MESSAGE"
 }
 
 function main () {
-  COMMIT_MESSAGE=$1
+  COMMIT_MESSAGE="$1"
   NEXT_VERSION=$(git branch --show-current)
   echo "[info] NEXT_VERSION: $NEXT_VERSION"
 
   update_gitmodules $NEXT_VERSION
 
-  commit $COMMIT_MESSAGE
+  commit "$COMMIT_MESSAGE"
 }
 
-DEFAULT_COMMIT_MESSAGE="update .gitmodules"
-main ${1:-$DEFAULT_COMMIT_MESSAGE}
+DEFAULT_COMMIT_MESSAGE="update: .gitmodules"
+main ${1:-"$DEFAULT_COMMIT_MESSAGE"}
 

@@ -27,7 +27,7 @@
 	path = common/xdevkit-setting
 	url = https://github.com/autoaim-jp/xdevkit-setting
 	update = rebase
-	branch = master
+	branch = v0.36
 [submodule "common/xdevkit-view-component"]
 	path = common/xdevkit-view-component
 	url = https://github.com/autoaim-jp/xdevkit-view-component
