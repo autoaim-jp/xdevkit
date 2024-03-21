@@ -9,6 +9,7 @@ function push_submodule_commit () {
   pushd $SUBMODULE_DIR_PATH > /dev/null
 
   NOT_PUSH_COMMIT_CNT=$(git log --oneline origin/${NEXT_VERSION}..${NEXT_VERSION} | wc -l)
+  echo $NOT_PUSH_COMMIT_CNT
   if [[ $NOT_PUSH_COMMIT_CNT -ne 0 ]]; then
     echo "[info] ${SUBMODULE_DIR_PATH} の新ブランチをpushします。 "
     git push $ORIGIN $NEXT_VERSION
