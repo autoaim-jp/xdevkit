@@ -2,8 +2,26 @@
 
 set -euo pipefail
 
+function push_submodule_commit () {
+  SUBMODULE_DIR_PATH=$1
+  NEXT_VERSION=$2
+  ORIGIN=$3
+  pushd $SUBMODULE_DIR_PATH > /dev/null
+
+  NOT_PUSH_COMMIT_CNT=$(git log --oneline origin/${NEXT_VERSION}..${NEXT_VERSION} | wc -l)
+  if [[ $NOT_PUSH_COMMIT_CNT -ne 0 ]]; then
+    echo "[info] ${SUBMODULE_DIR_PATH} の新ブランチをpushします。 "
+    git push $ORIGIN $NEXT_VERSION
+  else
+    echo "[info] ${SUBMODULE_DIR_PATH} の新ブランチはpush済みです。"
+  fi
+
+  popd > /dev/null
+}
+
 function update_gitmodules () {
   NEXT_VERSION=$1
+  ORIGIN=$2
 
   SUBMODULE_DIR_PATH_LIST=$(cat .gitmodules | grep "path = " | awk '{ printf $3 "\n" }')
   echo "$SUBMODULE_DIR_PATH_LIST" | while read SUBMODULE_DIR_PATH; do
@@ -27,6 +45,8 @@ function update_gitmodules () {
     else
       echo "[info] ${SUBMODULE_DIR_PATH} の新ブランチを使用します。 "
       git config -f .gitmodules --replace-all submodule.${SUBMODULE_DIR_PATH}.branch $NEXT_VERSION
+
+      push_submodule_commit $SUBMODULE_DIR_PATH $NEXT_VERSION $ORIGIN
     fi
   done
 }
@@ -43,7 +63,7 @@ function main () {
   NEXT_VERSION=$(git branch --show-current)
   echo "[info] NEXT_VERSION: $NEXT_VERSION"
 
-  update_gitmodules $NEXT_VERSION
+  update_gitmodules $NEXT_VERSION "github"
 
   commit "$COMMIT_MESSAGE"
 }
