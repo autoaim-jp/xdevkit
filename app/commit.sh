@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -euo pipefail
+
+function update_gitmodules () {
+  NEXT_VERSION=$1
+
+  SUBMODULE_DIR_PATH_LIST=$(cat .gitmodules | grep "path = " | awk '{ printf $3 "\n" }')
+  echo "$SUBMODULE_DIR_PATH_LIST" | while read SUBMODULE_DIR_PATH; do
+    pushd $SUBMODULE_DIR_PATH > /dev/null
+    DIFF_CNT=$(git status -s 2> /dev/null | wc -l)
+    if [[ $DIFF_CNT -ne 0 ]]; then
+      echo "[error] ${SUBMODULE_DIR_PATH} にコミットされていない変更があります。"
+      exit 1
+    fi
+
+    git checkout master > /dev/null 2>&1
+    git pull origin master > /dev/null 2>&1
+    MERGE_RESULT=$(git merge --no-commit 2> /dev/null)
+    git checkout $NEXT_VERSION > /dev/null 2>&1
+    popd > /dev/null
+
+    if [[ $MERGE_RESULT == "Already up to date." ]]; then
+      echo "[warn] ${SUBMODULE_DIR_PATH} の新ブランチにコミットがありません。"
+      git config -f .gitmodules --replace-all submodule.${SUBMODULE_DIR_PATH}.branch master
+    else
+      echo "[info] ${SUBMODULE_DIR_PATH} の新ブランチを使用します。 "
+      git config -f .gitmodules --replace-all submodule.${SUBMODULE_DIR_PATH}.branch $NEXT_VERSION
+    fi
+  done
+}
+
+function commit () {
+  COMMIT_MESSAGE=$1
+
+  git add .
+  git commit -a -m "$COMMIT_MESSAGE"
+}
+
+function main () {
+  COMMIT_MESSAGE=$1
+  NEXT_VERSION=$(git branch --show-current)
+  echo "[info] NEXT_VERSION: $NEXT_VERSION"
+
+  update_gitmodules $NEXT_VERSION
+
+  commit $COMMIT_MESSAGE
+}
+
+main ${1:-'update: .gitmodules'}
+
