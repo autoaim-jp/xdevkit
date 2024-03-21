@@ -16,7 +16,7 @@ function update_gitmodules () {
 
     git checkout master > /dev/null 2>&1
     git pull origin master > /dev/null 2>&1
-    MERGE_RESULT=$(git merge --no-commit 2> /dev/null)
+    MERGE_RESULT=$(git merge --no-commit $NEXT_VERSION 2> /dev/null)
     git checkout $NEXT_VERSION > /dev/null 2>&1
     popd > /dev/null
 
@@ -47,5 +47,6 @@ function main () {
   commit $COMMIT_MESSAGE
 }
 
-main ${1:-'update: .gitmodules'}
+DEFAULT_COMMIT_MESSAGE="update .gitmodules"
+main ${1:-$DEFAULT_COMMIT_MESSAGE}
 
