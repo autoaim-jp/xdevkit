@@ -8,8 +8,7 @@ function push_submodule_commit () {
   ORIGIN=$3
   pushd $SUBMODULE_DIR_PATH > /dev/null
 
-  NOT_PUSH_COMMIT_CNT=$(git log --oneline origin/${NEXT_VERSION}..${NEXT_VERSION} | wc -l)
-  echo $NOT_PUSH_COMMIT_CNT
+  NOT_PUSH_COMMIT_CNT=$(git log --oneline ${ORIGIN}/${NEXT_VERSION}..${NEXT_VERSION} | wc -l)
   if [[ $NOT_PUSH_COMMIT_CNT -ne 0 ]]; then
     echo "[info] ${SUBMODULE_DIR_PATH} の新ブランチをpushします。 "
     git push $ORIGIN $NEXT_VERSION
@@ -70,5 +69,5 @@ function main () {
 }
 
 DEFAULT_COMMIT_MESSAGE="update: .gitmodules"
-main ${1:-"$DEFAULT_COMMIT_MESSAGE"}
+main "${1:-$DEFAULT_COMMIT_MESSAGE}"
 

@@ -9,5 +9,5 @@ init-submodule:
 	git submodule update --init --remote
 	
 commit:
-	./app/commit.sh $(COMMIT_MESSAGE)
+	./app/commit.sh "$(COMMIT_MESSAGE)"
 
