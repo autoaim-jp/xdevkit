@@ -19,6 +19,21 @@ function push_submodule_commit () {
   popd > /dev/null
 }
 
+function check_submodule_status_is_clean () {
+  SUBMODULE_DIR_PATH_LIST=$(cat .gitmodules | grep "path = " | awk '{ printf $3 "\n" }')
+  echo "$SUBMODULE_DIR_PATH_LIST" | while read SUBMODULE_DIR_PATH; do
+    pushd $SUBMODULE_DIR_PATH > /dev/null
+
+    DIFF_CNT=$(git status -s 2> /dev/null | wc -l)
+    if [[ $DIFF_CNT -ne 0 ]]; then
+      echo "[error] ${SUBMODULE_DIR_PATH} にコミットされていない変更があります。"
+      exit 1
+    fi
+
+    popd > /dev/null
+  done
+}
+
 function update_gitmodules () {
   NEXT_VERSION=$1
   ORIGIN=$2
@@ -26,17 +41,13 @@ function update_gitmodules () {
   SUBMODULE_DIR_PATH_LIST=$(cat .gitmodules | grep "path = " | awk '{ printf $3 "\n" }')
   echo "$SUBMODULE_DIR_PATH_LIST" | while read SUBMODULE_DIR_PATH; do
     pushd $SUBMODULE_DIR_PATH > /dev/null
-    DIFF_CNT=$(git status -s 2> /dev/null | wc -l)
-    if [[ $DIFF_CNT -ne 0 ]]; then
-      echo "[error] ${SUBMODULE_DIR_PATH} にコミットされていない変更があります。"
-      exit 1
-    fi
 
     git checkout master > /dev/null 2>&1
     git pull origin master > /dev/null 2>&1
     MERGE_RESULT=$(git merge --no-commit --no-ff $NEXT_VERSION 2> /dev/null)
     git merge --abort > /dev/null 2>&1 || true
     git checkout $NEXT_VERSION > /dev/null 2>&1
+
     popd > /dev/null
 
     if [[ $MERGE_RESULT == "Already up to date." ]]; then
@@ -63,6 +74,7 @@ function main () {
   NEXT_VERSION=$(git branch --show-current)
   echo "[info] NEXT_VERSION: $NEXT_VERSION"
 
+  check_submodule_status_is_clean
   update_gitmodules $NEXT_VERSION "github"
 
   commit "$COMMIT_MESSAGE"
