@@ -80,6 +80,6 @@ function main () {
   commit "$COMMIT_MESSAGE"
 }
 
-DEFAULT_COMMIT_MESSAGE="update: .gitmodules"
+DEFAULT_COMMIT_MESSAGE="feat: update submodule"
 main "${1:-$DEFAULT_COMMIT_MESSAGE}"
 
