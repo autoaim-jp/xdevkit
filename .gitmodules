@@ -7,7 +7,7 @@
 	path = standalone/xdevkit-eslint
 	url = https://github.com/autoaim-jp/xdevkit-eslint
 	update = rebase
-	branch = v0.40
+	branch = master
 [submodule "standalone/xdevkit-htpasswd"]
 	path = standalone/xdevkit-htpasswd
 	url = https://github.com/autoaim-jp/xdevkit-htpasswd
@@ -32,5 +32,5 @@
 	path = common/xdevkit-view-component
 	url = https://github.com/autoaim-jp/xdevkit-view-component
 	update = rebase
-	branch = v0.40
+	branch = master
 
